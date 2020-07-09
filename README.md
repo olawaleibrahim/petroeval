@@ -37,3 +37,5 @@ Subsequent release features:
 ## create an instance of the reservoir section passing in required arguments
 - `from evaluate_reservoir import FormationEvaluation`
 
+## Tutorial can be found on 
+- `https://github.com/olawaleibrahim/petroeval/blob/master/tutorial.ipynb`
