@@ -206,7 +206,7 @@ class FormationEvaluation:
             ntg = []
             for vsh in df3['vsh']:
                 amount = 1 - vsh
-                ntg.append(vsh)
+                ntg.append(amount)
 
             df3['ntg'] = ntg
             df3['phid'] = phid
@@ -233,7 +233,7 @@ class FormationEvaluation:
             df4['GR'] = df3[gr]
             df4['LITHO'] = df3['litho']
             df4['VSH'] = df3['vsh']
-            df4['NTG'] = df3['ntg']
+            #df4['NTG'] = df3['ntg']
             df4['NET_PAY'] = df3['Net_Pay']
             #df4['PHID'] = df3['phid']
             df4['PHIDF'] = df3['phidf']
@@ -264,7 +264,7 @@ class FormationEvaluation:
             table = self.show_table()
 
             grk = table.LITHO.sum()
-            ntg = table.NTG.mean()
+            ntg = table.NET_PAY.sum()/table.LITHO.sum()
             net_pay = table.NET_PAY.sum()
             phidf = table.PHIDF.mean()
             phie = table.PHIE.mean()
