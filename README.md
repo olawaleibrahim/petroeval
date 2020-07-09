@@ -25,14 +25,13 @@ Subsequent release features:
 
 ### QUICK TUTORIAL
 
-`import file (csv, lasio)
-import lasio
+### import file (csv, lasio)
+`import lasio
 las = lasio.read('WLC_PETRO_COMPUTED_INPUT_1.LAS')
 df = las.df()
 `
-`
-import modules and functions
-import numpy
+### import modules and functions
+`import numpy
 import evaluate_reservoir
 from visualizations import summary, log_plot`
 
