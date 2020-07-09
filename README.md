@@ -38,4 +38,4 @@ Subsequent release features:
 - `from evaluate_reservoir import FormationEvaluation`
 
 ## Tutorial can be found on 
-- `https://github.com/olawaleibrahim/petroeval/blob/master/tutorial.ipynb`
+- `https://github.com/olawaleibrahim/petroeval/blob/master/Tutorial.ipynb`
