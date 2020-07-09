@@ -1,0 +1,6 @@
+README.md
+setup.py
+petroeval.egg-info/PKG-INFO
+petroeval.egg-info/SOURCES.txt
+petroeval.egg-info/dependency_links.txt
+petroeval.egg-info/top_level.txt
