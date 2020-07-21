@@ -1,11 +1,10 @@
 '''
 Python module for formation reservoir evaluation
-First release v1.0.1 by Ibrahim Olawale
+Author: Ibrahim Olawale
 '''
 
 import numpy as np
 import pandas as pd
-from visualizations import summary
 
 class FormationEvaluation:
     '''

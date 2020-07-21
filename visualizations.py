@@ -2,6 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def summary(data):
+    
+    '''
+
+    '''
+
     print(f'Title: Petrophysical Summary of the Parameters Evaluated')
     return data.describe()
 
@@ -48,9 +53,9 @@ def log_plot(logs, depth=False, *argv):
         ax[3].set_xlabel("RT (ohm.m)")
         ax[3].set_xlim(-2,np.log(logs.RT.max()))
         
-        ax[0].set_yticklabels([]); ax[1].set_yticklabels([]);
+        ax[0].set_yticklabels([]); ax[1].set_yticklabels([])
         ax[2].set_yticklabels([])
-        ax[3].set_yticklabels([]); #ax[4].set_yticklabels([]) 
+        ax[3].set_yticklabels([]) #ax[4].set_yticklabels([]) 
         
         f.suptitle('Log Plots, fontsize=14,y=0.94')
     
