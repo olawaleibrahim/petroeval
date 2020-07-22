@@ -142,16 +142,17 @@ class FormationEvaluation:
             vsh = []
 
             for i in range(data.shape[0]):
-                reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.83
+                reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
                 
                 #To correct for negative volumes of shale as this is practically not correct
 
                 if reading < 0:
-                    reading = 0
-                    vsh.append(reading)
+                    vsh.append(0)
+
+                elif reading > 1:
+                    vsh.append(1)
                 else:
-                    reading1 = reading
-                    vsh.append(reading1)
+                    vsh.append(reading)
 
             #ntg = []
 
@@ -194,8 +195,8 @@ class FormationEvaluation:
                 if (phid[i] <= 0.15):
                     i = 0.15
                     phidf.append(i)
-                elif (phid[i]) >= 0.8:
-                    i = 0.8
+                elif (phid[i]) >= 0.6:
+                    i = 0.6
                     phidf.append(i)
                 else:
                     i = phid[i]
@@ -241,12 +242,10 @@ class FormationEvaluation:
 
             phie = []
             for i in range(df3.shape[0]):
-                reading = df3['phidf'].iloc[i] * (1 - df3['vsh'].iloc[i])
+                reading = df3['phidf'].iloc[i] * df3['ntg'].iloc[i]
                 if reading < 0:
-                    #reading = 0
                     phie.append(int(0))
                 else:
-                    #reading1 = reading
                     phie.append(reading)
             
             #return evaluated parameters
