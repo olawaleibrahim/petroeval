@@ -9,14 +9,16 @@ import pandas as pd
 class FormationEvaluation:
     '''
     Class to evaluate a reservoir based on four main petrophysical parameters.
-    data: dataframe  or csv format of data
-    gr: gamma ray column of table
-    nphi: neutron porosity column title
-    dens: density column title
-    res: resistivity column title
-    top: top of reservoir (in, metres, feets)
-    bottom: bottom of reservoir (in, metres, feets)
-    cutoff: Shale baseline value in API
+    Creates an instance of the reservoir to be evaluated
+    args::
+        data: dataframe  or csv format of data
+        gr: gamma ray column of table
+        nphi: neutron porosity column title
+        dens: density column title
+        res: resistivity column title
+        top: top of reservoir (in, metres, feets)
+        bottom: bottom of reservoir (in, metres, feets)
+        cutoff: Shale baseline value in API
     '''
 
     def __init__(self, data, gr, nphi, dens, res, top, bottom, cutoff):
@@ -37,63 +39,85 @@ class FormationEvaluation:
             print(f'Input right format {err}')
             
         
-    def fill_missing(self, use_mean, *value):
+    def fill_missing(self, use_mean, value):
 
         '''
         Method to fill in missing values in the dataset and return dataframe
-        use_mean: Use the mean value of a column to fill the column
+        use_mean: Specify True or False
+                  Use the mean value of a column to fill the column if specified as True
+                  Value should be specified if use_mean is set to False
+        value: Specified value is used to fill the whole columns
         '''
+
+        if isinstance(value, str):
+            raise NameError(f'{value} is nota valid data type for filling missing values.\n Use integer or float')
+
         try:
-            print('Time computation is proportional to size of dataset and amount of missing values present')
+            print('Filling missing values...')
             data = self.data
             cols = list(data.columns)
 
             if use_mean == True:
                 for col in cols:
-                    for i in range(len(data[col])):
+
+                    data[col] = data[col].fillna(data[col].mean())
+                    '''for i in range(len(data[col])):
                         if np.isnan(data[col].iloc[i]):
                             
                             data[col].iloc[i] = data[col].mean()
                         else:
                             data[col].iloc[i] = data[col].iloc[i]
+                    '''
             
-            else:
+            elif use_mean == False:
                 cols = list(data.columns)
-                for col in cols:
-                    for i in range(len(data[col])):
-                        if np.isnan(data[col].iloc[i]):
-                            
-                            data[col].iloc[i] = value
-                        else:
-                            data[col].iloc[i] = data[col].iloc[i]
+                data = data.fillna(value)
+                #'''
+                #    for i in range(len(data[col])):
+                #        if np.isnan(data[col].iloc[i]):
+                #            
+                #            data[col].iloc[i] = value
+                #        else:
+                #            data[col].iloc[i] = data[col].iloc[i]
+               
 
             return data
 
         except ModuleNotFoundError as err:
             print (f'Install required module. {err}')
+
         
         except TypeError as err:
             print(f'Unsupported Format: Process inputs as data input type is incompatible with method')
             
 
-    def show_table(self):
+    def show_table(self, baseline_default):
         
         '''
         Method to carry out formation evaluation of a reservoir
-        and return the table
+        Returns: Dataframe object with the petrophysical parameters evaluated
+        Args:: baseeline_default: Default cutoff is used to determine shalebaseline for evaluation
+               Set to True to use default baseline. If set to False, cutoff value specified during class instation is used
+        
+        Default baseline is calculated by finding the average of the minimum and maximum shale values
         '''
 
         top = self.top
         bottom = self.bottom
         bottom = bottom + 1
         data = self.data.iloc[top:bottom]
-        #data = self.data
-        #data = data.iloc[top:bottom, :]
         gr = self.gr
         nphi = self.nphi
         dens = self.dens
         res = self.res
-        cutoff = self.cutoff
+        #cutoff = self.cutoff
+
+        if baseline_default == True:
+            cutoff = (data[gr].min() + data[gr].max() / 2)
+            print(f'Default baseline {cutoff} is used for evaluation')
+
+        else:
+            cutoff = self.cutoff
 
         try:
             for i in range(data.shape[0]):
@@ -118,16 +142,17 @@ class FormationEvaluation:
             vsh = []
 
             for i in range(data.shape[0]):
-                reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.83
+                reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
                 
                 #To correct for negative volumes of shale as this is practically not correct
 
                 if reading < 0:
-                    reading = 0
-                    vsh.append(reading)
+                    vsh.append(0)
+
+                elif reading > 1:
+                    vsh.append(1)
                 else:
-                    reading1 = reading
-                    vsh.append(reading1)
+                    vsh.append(reading)
 
             #ntg = []
 
@@ -170,8 +195,8 @@ class FormationEvaluation:
                 if (phid[i] <= 0.15):
                     i = 0.15
                     phidf.append(i)
-                elif (phid[i]) >= 0.8:
-                    i = 0.8
+                elif (phid[i]) >= 0.6:
+                    i = 0.6
                     phidf.append(i)
                 else:
                     i = phid[i]
@@ -217,13 +242,11 @@ class FormationEvaluation:
 
             phie = []
             for i in range(df3.shape[0]):
-                reading = df3['phidf'].iloc[i] * (1 - df3['vsh'].iloc[i])
+                reading = df3['phidf'].iloc[i] * df3['ntg'].iloc[i]
                 if reading < 0:
-                    reading = 0
-                    phie.append(reading)
+                    phie.append(int(0))
                 else:
-                    reading1 = reading
-                    phie.append(reading1)
+                    phie.append(reading)
             
             #return evaluated parameters
             
@@ -240,27 +263,30 @@ class FormationEvaluation:
             df4['SW'] = df3['sw']
             df4['OIL_SAT'] = df3['oil_sat']
             
+            print('ESTIMATED PETROPHYSICAL PARAMETERS')
             return df4
 
         except ModuleNotFoundError as err:
-            print (f'Install required module. {err}')
+            print(f'Install required module. {err}')
 
         except TypeError as err:
             print(f'Unsupported Format: Process inputs as data input type is incompatible with method')
 
 
-    def parameters(self):
+    def parameters(self, baseline_default):
 
         '''
-        Method to return a dictionary of paraeters evaluated;
-        Net to Gross ratio
-        Total porosity evaluated
-        Water saturation and
-        Oil saturation
+        Method to return a dictionary of paraeters evaluated
+        Returns a dictionary of the parameters values;
+        Values::
+                Net to Gross ratio
+                Total porosity evaluated
+                Water saturation and
+                Oil saturation
         '''
 
         try:
-            table = self.show_table()
+            table = self.show_table(baseline_default)
 
             grk = table.LITHO.sum()
             ntg = table.NET_PAY.sum()/table.LITHO.sum()
@@ -287,5 +313,3 @@ class FormationEvaluation:
         except ModuleNotFoundError as err:
             print (f'Install required module. {err}')
         
-        #except TypeError as err:
-            #print(f'Unsupported Format: Process inputs as data input type is incompatible with method')
