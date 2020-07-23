@@ -39,4 +39,4 @@ from visualizations import summary, log_plot
 #create an instance of the reservoir section passing in required arguments
 from evaluate_reservoir import FormationEvaluation
 
-Tutorial link: https://github.com/olawaleibrahim/petroeval/blob/master/Tutorial.ipynb
+Tutorial link: https://github.com/olawaleibrahim/petroeval/blob/master/petroeval/Tutorial.ipynb
