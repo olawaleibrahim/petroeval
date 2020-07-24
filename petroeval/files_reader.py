@@ -11,7 +11,7 @@ def read_lasio(path:'str')->'object':
 
     """
     assert isinstance(path, str), 'File must be in a string'
-    assert path.endswith('LAS'), 'File must be a valid Lasio files'
+    assert path.endswith('LAS') or path.endswith('las'), 'File must be a valid Lasio files'
 
     try:
 
