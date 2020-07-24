@@ -2,14 +2,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def four_plots(logs, depth=False):
+    
+    '''
+    Function to automatically plot well logs
+    Returns a plot of four logs(Gamma ray, Porosity, Density and Resistivity)
+    args::
+          logs: Dataframe object of well logs
+          depth: Set to false or leave as default to use dataframe index
+                 Set to column title if column depth should be used
+    '''
 
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
     else:
-        logs['DEPTH'] = logs.depth
-        logs['DEPTH'] = logs.DEPTH
-        logs['DEPTH'] = logs.Depth
+        logs['DEPTH'] = logs[depth]
             
     try:
 
@@ -32,16 +39,16 @@ def four_plots(logs, depth=False):
             ax[0].set_xlabel("GR (API)")
             ax[0].set_xlim(logs.GR.min(), 200)
             ax[0].set_ylabel("Depth(ft)")
+            ax[0].set_title(f"Plot of Depth Against GR")
             ax[1].set_xlabel("NPHI (v/v)")
             ax[1].set_xlim(logs.NPHI.min(),logs.NPHI.max())
+            ax[1].set_title(f"Plot of Depth Against Neutron Porosity")
             ax[2].set_xlabel("RHOB (g/cm3)")
             ax[2].set_xlim(logs.RHOB.min(),logs.RHOB.max())
+            ax[2].set_title(f"Plot of Depth Against Density")
             ax[3].set_xlabel("RT (ohm.m)")
             ax[3].set_xlim(-2,np.log(logs.RT.max()))
-                    
-            ax[0].set_yticklabels([]); ax[1].set_yticklabels([])
-            ax[2].set_yticklabels([])
-            ax[3].set_yticklabels([]) #ax[4].set_yticklabels([]) 
+            ax[3].set_title(f"Plot of Depth Against Resistivity")
                     
             f.suptitle('Log Plots, fontsize=14,y=0.94')
                 

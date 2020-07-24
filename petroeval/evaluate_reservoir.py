@@ -113,8 +113,12 @@ class FormationEvaluation:
         #cutoff = self.cutoff
 
         if baseline_default == True:
-            cutoff = (data[gr].min() + data[gr].max() / 2)
-            print(f'Default baseline {cutoff} is used for evaluation')
+            cutoff_test = (data[gr].min() + data[gr].max() / 2)
+            if cutoff_test > 80:
+                cutoff_test = cutoff_test
+                print(f'Default baseline {cutoff} is used for evaluation')
+            else:
+            print(f'Default baseline {cutoff_test} is used for evaluation')
 
         else:
             cutoff = self.cutoff
