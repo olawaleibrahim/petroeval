@@ -33,7 +33,7 @@ def read_lasios(*args)->'list':
 
     """
 
-    assert [path.endswith('LAS') for path in args] ,'Files must be a valid lasio files'
+    assert [path.lower().endswith('las') for path in args] ,'Files must be a valid lasio files'
 
     try:
             files=list()
