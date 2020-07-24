@@ -1,4 +1,4 @@
-Formation Evaluation Package
+## Formation Evaluation Package
 
 Formation evaluation module for geoscientists, petrophysicists for easy and quick quantitative petrophysical analysis.
 
@@ -24,19 +24,29 @@ Subsequent release features:
 -   Permeability of reservoir section
 -   Official documentations to follow
 
-QUICK TUTORIAL
+### QUICK TUTORIAL
 
-#import file (csv, lasio)
-import lasio
-las = lasio.read('WLC_PETRO_COMPUTED_INPUT_1.LAS')
-df = las.df()
-
-#import modules and functions
-import numpy
-import evaluate_reservoir
-from visualizations import summary, log_plot
-
-#create an instance of the reservoir section passing in required arguments
-from evaluate_reservoir import FormationEvaluation
+         #reading  a single lasio file
+         
+         from petroeval import read_lasio
+         las = read_lasio('WLC_PETRO_COMPUTED_INPUT_1.LAS')
+         df = las.df()
+        
+         #reading  multiple lasio files
+         
+         from petroval import read_lasios
+         las1='WLC_PETRO_COMPUTED_INPUT_1.LAS'
+         las2='WLC_PETRO_COMPUTED_INPUT_1.LAS'
+         las=read_lasios(las1,las2) =>returns a list of the read lasio objects
+    
+        #import modules and functions
+        
+        import numpy
+        from petroeval import evaluate_reservoir
+        from petroeval.visualizations import summary, log_plot
+        
+        #Create an instance of the reservoir section passing in required arguments
+        
+        from evaluate_reservoir import FormationEvaluation
 
 Tutorial link: https://github.com/olawaleibrahim/petroeval/blob/master/petroeval/Tutorial.ipynb
