@@ -110,18 +110,19 @@ class FormationEvaluation:
         nphi = self.nphi
         dens = self.dens
         res = self.res
-        #cutoff = self.cutoff
+        cutoff = self.cutoff
 
         if baseline_default == True:
             cutoff_test = (data[gr].min() + data[gr].max() / 2)
             if cutoff_test > 80:
-                cutoff_test = cutoff_test
-                print(f'Default baseline {cutoff} is used for evaluation')
+                cutoff_test = 80
+                print(f'Default baseline {cutoff_test} is used for evaluation')
             else:
                 print(f'Default baseline {cutoff_test} is used for evaluation')
 
         else:
-            cutoff = self.cutoff
+            cutoff_test = self.cutoff
+            print(f'{cutoff_test} will be used for evaluation')
 
         try:
             for i in range(data.shape[0]):
@@ -135,7 +136,7 @@ class FormationEvaluation:
             gr_cutoff = []
             
             for i in range(data.shape[0]):
-                if (data[gr].iloc[i] < cutoff):
+                if (data[gr].iloc[i] < cutoff_test):
                     i = 1
                     gr_cutoff.append(i)
                 else:
@@ -169,7 +170,7 @@ class FormationEvaluation:
             
 
             for i in range(data.shape[0]):
-                if (data[gr].iloc[i] < cutoff) and (data[nphi].iloc[i] > 0.25):
+                if (data[gr].iloc[i] < cutoff_test) and (data[nphi].iloc[i] > 0.25):
                     i = 1
                     net.append(i)
                 else:
@@ -212,12 +213,15 @@ class FormationEvaluation:
             sw = []
             
             for i in range(df3.shape[0]):
-                i = np.sqrt(0.10 / (df3[res].iloc[i]) * (phidf[i] ** 1.74))
-                if i == float('inf'):
-                    i == 0.1
-                    sw.append(i)
+                #i = np.sqrt(0.10 / (df3[res].iloc[i]) * (phidf[i] ** 1.74))
+                #if i == float('inf'):
+                j = np.sqrt(0.10/(df3[res].mean() * (phidf[i] ** 1.74)))
+                if j < 0:
+                    sw.append(j)
+                elif j > 1:
+                    sw.append(1)
                 else:
-                    sw.append(i)
+                    sw.append(j)
                     
             #Calculating oil saturation
             
@@ -317,3 +321,4 @@ class FormationEvaluation:
         except ModuleNotFoundError as err:
             print (f'Install required module. {err}')
         
+

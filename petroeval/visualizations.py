@@ -1,6 +1,4 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from .plots import *
+from .plots import four_plots, three_plots, two_plots, one_plot
 
 def summary(data):
     
@@ -103,7 +101,7 @@ def log_plot(logs, GR=True, NPHI=True, RHOB=True, RT=True, no_plots=4):
         print(f'Install module. {err}')
 
     except AttributeError as err:
-        print(f'Attritubute not found. Specify attribute. {err}')
+        print(f'NameError: Attritubute not found. Specify attribute. {err}')
 
 
 
