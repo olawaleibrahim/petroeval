@@ -118,7 +118,7 @@ class FormationEvaluation:
                 cutoff_test = cutoff_test
                 print(f'Default baseline {cutoff} is used for evaluation')
             else:
-            print(f'Default baseline {cutoff_test} is used for evaluation')
+                print(f'Default baseline {cutoff_test} is used for evaluation')
 
         else:
             cutoff = self.cutoff
