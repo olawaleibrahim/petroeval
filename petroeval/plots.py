@@ -16,7 +16,9 @@ def four_plots(logs, depth=False):
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
     else:
-        logs['DEPTH'] = logs[depth]
+        depth = np.array(logs[depth])
+        logs = logs.reset_index(drop=True)
+        logs['DEPTH'] = depth
             
     try:
 
@@ -55,15 +57,24 @@ def four_plots(logs, depth=False):
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def three_plots(logs, para1, para2, para3, unit1, unit2, unit3, depth=False):
+def three_plots(logs, x1, x2, x3, depth=False):
+
+    '''
+    Function to automatically plot well logs
+    Returns a plot of three logs(x1, x2, x3)
+    args::
+          logs: Dataframe object of well logs
+          depth: Set to false or leave as default to use dataframe index
+                 Set to column title if column depth should be used
+    '''
 
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
     else:
-        logs['DEPTH'] = logs.depth
-        logs['DEPTH'] = logs.DEPTH
-        logs['DEPTH'] = logs.Depth
+        depth = np.array(logs[depth])
+        logs = logs.reset_index(drop=True)
+        logs['DEPTH'] = depth
             
     try:
 
@@ -74,40 +85,49 @@ def three_plots(logs, para1, para2, para3, unit1, unit2, unit3, depth=False):
                     
         f, ax = plt.subplots(nrows=1, ncols=3, figsize=(10,8))
         
-        ax[0].plot(logs[para1], logs.DEPTH, color='black')
-        ax[1].plot(logs[para2], logs.DEPTH, color='c')
-        ax[2].plot(logs[para3], logs.DEPTH, color='blue')
+        ax[0].plot(logs[x1], logs.DEPTH, color='black')
+        ax[1].plot(logs[x2], logs.DEPTH, color='c')
+        ax[2].plot(logs[x3], logs.DEPTH, color='blue')
                     
         for i in range(len(ax)):
             ax[i].set_ylim(top,bot)
             ax[i].invert_yaxis()
             ax[i].grid()
                         
-            ax[0].set_xlabel(f"{para1} ({unit1})")
-            ax[0].set_xlim(logs[para1].min(), logs[para1].max())
+            ax[0].set_xlabel(f"{x1}  ")
+            ax[0].set_xlim(logs[x1].min(), logs[x1].max())
             ax[0].set_ylabel("Depth(ft)")
-            ax[0].set_title(f"Plot of Depth Against {para1}")
-            ax[1].set_xlabel(f"{para2} ({unit2})")
-            ax[1].set_xlim(logs[para2].min(),logs[para2].max())
-            ax[1].set_title(f"Plot of Depth Against {para2}")
-            ax[2].set_xlabel(f"{para3} ({unit3})")
-            ax[2].set_xlim(logs[para3].min(),logs[para3].max())
-            ax[2].set_title(f"Plot of Depth Against {para3}")
+            ax[0].set_title(f"Plot of Depth Against {x1}")
+            ax[1].set_xlabel(f"{x2} ")
+            ax[1].set_xlim(logs[x2].min(),logs[x2].max())
+            ax[1].set_title(f"Plot of Depth Against {x2}")
+            ax[2].set_xlabel(f"{x3}")
+            ax[2].set_xlim(logs[x3].min(),logs[x3].max())
+            ax[2].set_title(f"Plot of Depth Against {x3}")
                     
             #f.suptitle('Log Plots, fontsize=14,y=0.94')
                 
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def two_plots(logs, para1, para2, unit1, unit2, depth=False):
+def two_plots(logs, x1, x2, depth=False):
+
+    '''
+    Function to automatically plot well logs
+    Returns a plot of two logs(x1, x2)
+    args::
+          logs: Dataframe object of well logs
+          depth: Set to false or leave as default to use dataframe index
+                 Set to column title if column depth should be used
+    '''
 
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
     else:
-        logs['DEPTH'] = logs.depth
-        logs['DEPTH'] = logs.DEPTH
-        logs['DEPTH'] = logs.Depth
+        depth = np.array(logs[depth])
+        logs = logs.reset_index(drop=True)
+        logs['DEPTH'] = depth
             
     try:
 
@@ -118,36 +138,44 @@ def two_plots(logs, para1, para2, unit1, unit2, depth=False):
                     
         f, ax = plt.subplots(nrows=1, ncols=2, figsize=(8,10))
         
-        ax[0].plot(logs[para1], logs.DEPTH, color='black')
-        ax[1].plot(logs[para2], logs.DEPTH, color='c')
+        ax[0].plot(logs[x1], logs.DEPTH, color='black')
+        ax[1].plot(logs[x2], logs.DEPTH, color='c')
                     
         for i in range(len(ax)):
             ax[i].set_ylim(top,bot)
             ax[i].invert_yaxis()
             ax[i].grid()
                         
-            ax[0].set_xlabel(f"{para1} ({unit1})")
-            ax[0].set_xlim(logs[para1].min(), logs[para1].max())
+            ax[0].set_xlabel(f"{x1}  ")
+            ax[0].set_xlim(logs[x1].min(), logs[x1].max())
             ax[0].set_ylabel("Depth(ft)")
-            ax[0].set_title(f"Plot of Depth Against {para1}")
-            ax[1].set_xlabel(f"{para2} ({unit2})")
-            ax[1].set_xlim(logs[para2].min(),logs[para2].max())
-            ax[1].set_title(f"Plot of Depth Against {para2}")
+            ax[0].set_title(f"Plot of Depth Against {x1}")
+            ax[1].set_xlabel(f"{x2}  ")
+            ax[1].set_xlim(logs[x2].min(),logs[x2].max())
+            ax[1].set_title(f"Plot of Depth Against {x2}")
                     
             #f.suptitle('Log Plots, fontsize=14,y=0.94')
                 
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def one_plot(logs, para, unit, depth=False):
+def one_plot(logs, x1, depth=False):
+
+    '''
+    Function to automatically plot a single well log
+    args::
+          logs: Dataframe object of well logs
+          depth: Set to false or leave as default to use dataframe index
+                 Set to column title if column depth should be used
+    '''
 
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
     else:
-        logs['DEPTH'] = logs.depth
-        logs['DEPTH'] = logs.DEPTH
-        logs['DEPTH'] = logs.Depth
+        depth = np.array(logs[depth])
+        logs = logs.reset_index(drop=True)
+        logs['DEPTH'] = depth
             
     try:
 
@@ -157,16 +185,16 @@ def one_plot(logs, para, unit, depth=False):
         bot = logs.DEPTH.max()
                     
         f, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,10))
-        ax.plot(logs[para], logs.DEPTH, color='black')
+        ax.plot(logs[x1], logs.DEPTH, color='black')
         
         ax.set_ylim(top,bot)
         ax.invert_yaxis()
         ax.grid()
                         
-        ax.set_xlabel(f"{para} ({unit})")
-        ax.set_xlim(logs[para].min(), logs[para].max())
+        ax.set_xlabel(f"{x1}")
+        ax.set_xlim(logs[x1].min(), logs[x1].max())
         ax.set_ylabel("Depth(ft)")
-        ax.set_title(f"Plot of Depth Against {para}")
+        ax.set_title(f"Plot of Depth Against {x1}")
                     
         #ax.set_yticklabels([])
                     
