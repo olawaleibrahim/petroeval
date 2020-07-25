@@ -1,7 +1,7 @@
 __all__=['read_lasio','read_lasios','plots','visualizations','evaluate_reservoir']
 
 from petroeval import visualizations
-from petroeval import evaluate_reservoir
+from petroeval import evaluate_reservoir, plots
 from .evaluate_reservoir import FormationEvaluation
 from .visualizations import log_plot
 from petroeval import files_reader

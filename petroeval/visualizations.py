@@ -1,6 +1,4 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from .plots import *
+from .plots import four_plots, three_plots, two_plots, one_plot
 
 def summary(data):
     
@@ -61,49 +59,49 @@ def log_plot(logs, GR=True, NPHI=True, RHOB=True, RT=True, no_plots=4):
         #if number of plots is equal to four
         elif no_plots == 3:
             if GR and NPHI and RHOB:
-                three_plots(logs, 'GR', 'NPHI', 'RHOB', 'API', 'units', 'g/cm3')
+                three_plots(logs, 'GR', 'NPHI', 'RHOB')
             elif GR and NPHI and RT:
-                three_plots(logs, 'GR', 'NPHI', 'RT', 'API', 'units', 'ohm m')
+                three_plots(logs, 'GR', 'NPHI', 'RT')
             elif GR and RHOB and RT:
-                three_plots(logs, 'GR', 'RHOB', 'RT', 'API', 'g/cm3', 'ohm m')
+                three_plots(logs, 'GR', 'RHOB', 'RT')
             elif NPHI and RHOB and RT:
-                three_plots(logs, 'NPHI', 'RHOB', 'RT', 'units', 'g/cm3', 'ohm m')
+                three_plots(logs, 'NPHI', 'RHOB', 'RT')
 
         #if number of plots is equal to two (possible combinations)
         elif no_plots == 2:
 
             if GR and NPHI:
-                two_plots(logs, 'GR', 'NPHI', 'API', 'units')
+                two_plots(logs, 'GR', 'NPHI')
             elif GR and RHOB:
-                two_plots(logs, 'GR', 'RHOB', 'API', 'g/cm3')
+                two_plots(logs, 'GR', 'RHOB')
             elif GR and RT:
-                two_plots(logs, 'GR', 'RT', 'API', 'ohm m')
+                two_plots(logs, 'GR', 'RT')
             elif NPHI and RHOB:
-                two_plots(logs, 'NPHI', 'RHOB', 'units', 'g/cm3')
+                two_plots(logs, 'NPHI', 'RHOB')
             elif NPHI and RT:
-                two_plots(logs, 'NPHI', 'RT', 'units', 'ohm m')
+                two_plots(logs, 'NPHI', 'RT')
             elif RHOB and RT:
-                two_plots(logs, 'RHOB', 'RT', 'g/cm3', 'ohm m')
+                two_plots(logs, 'RHOB', 'RT')
 
         #if number of plots is equal to 1 (possible combinations)
 
         elif no_plots == 1:
 
             if GR:
-                one_plot(logs, 'GR', 'API')
+                one_plot(logs, 'GR')
             elif NPHI:
-                one_plot(logs, 'NPHI', 'units')
+                one_plot(logs, 'NPHI')
             elif RHOB:
-                one_plot(logs, 'RHOB', 'g/cm3')
+                one_plot(logs, 'RHOB')
             else:
-                one_plot(logs, 'RT', 'ohms m')
+                one_plot(logs, 'RT')
 
     
     except ModuleNotFoundError as err:
         print(f'Install module. {err}')
 
     except AttributeError as err:
-        print(f'Attritubute not found. Specify attribute. {err}')
+        print(f'NameError: Attritubute not found. Specify attribute. {err}')
 
 
 
