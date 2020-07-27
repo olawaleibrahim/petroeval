@@ -1,0 +1,6 @@
+   vsh = []
+            
+
+            for i in range(data.shape[0]):
+                IGR = (data[gr].iloc[i] -(min(data[gr].iloc[i])))/(max(data[gr].iloc[i])-(min(data[gr.iloc[i]])))
+                Vsh_Tertiaryrocks = 0.083*(pow(2,(3.7*IGR))-1)
