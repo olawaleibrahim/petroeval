@@ -241,12 +241,12 @@ class FormationEvaluation:
             #df3['Net_Pay'] = net_pay
             
             #Calculate Net to Gross
-            ntg = []
-            for vsh in df3['vsh']:
-                amount = 1 - vsh
-                ntg.append(amount)
+            #ntg = []
+            #for vsh in df3['vsh']:
+                #amount = 1 - vsh
+                #ntg.append(amount)
 
-            df3['ntg'] = ntg
+            #df3['ntg'] = ntg
             df3['phid'] = phid
             df3['phidf'] = phidf
             df3['sw'] = sw
