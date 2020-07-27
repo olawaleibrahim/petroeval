@@ -146,8 +146,14 @@ class FormationEvaluation:
             #To calculate volume of shale
             vsh = []
 
+            min_gr = data[gr].min()
+            max_gr = data[gr].max()
+
             for i in range(data.shape[0]):
-                reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
+
+                IGR = (data[gr].iloc[i] - min_gr) / (max_gr - min_gr)
+                reading = 0.083 * ((2** (3.7 * IGR)) - 1)
+                #reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
                 
                 #To correct for negative volumes of shale as this is practically not correct
 
