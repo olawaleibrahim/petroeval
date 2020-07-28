@@ -3,12 +3,14 @@ Module for preprocessing las file before formation evaluation
 For a better user experience, this module is advised to be used before formation evaluation
 to avoid errors and glitches
 '''
+
 import pandas as pd
 
 def set_mnemonics(data, GR, NPHI, RHOB, RT):
     
     '''
     Function to set logs mnemonics to a standard title for later use
+    Only properties used for formation evaluation are required
     args::
             data: dataframe object of well logs
             GR: gamma Ray mnemonics; set equal to the gamma ray title of the well log/dataframe
@@ -28,3 +30,34 @@ def set_mnemonics(data, GR, NPHI, RHOB, RT):
 
     return data
     
+def truncation(data, GR, truncate=True):
+    
+    '''
+    Function to preprocess data ranges;
+    truncates outrageous outliers of reservoir properties
+
+    args::
+            data: dataframe object of well log
+            gr: if set to True; Gamma Ray values will be set to the standard 0-150 API range
+                if set to False; no truncation will be done
+
+    returns: dataframe object with preprocessed properties
+    '''
+
+    assert isinstance(data, pd.DataFrame), 'Data should be a DataFrame object'
+    assert isinstance(GR, str), f'{GR} is of type {type(GR)}. GR value should be set a string.'
+    assert isinstance(truncate, bool), f'truncate value should be a boolean value'
+
+    if truncate==False:
+        pass
+
+    else:
+        for ii in range(data.shape[0]):
+            if ii < 0:
+                data[GR].iloc[ii] = (data[GR].iloc[ii]/data[GR].min()) * 5
+            elif ii > 150:
+                data[GR].iloc[ii] = (data[GR].iloc[ii]/data[GR].max()) * 150
+            else:
+                pass
+
+    return data

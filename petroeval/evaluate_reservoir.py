@@ -203,11 +203,11 @@ class FormationEvaluation:
             phidf = []
 
             for i in range(0, df3.shape[0]):
-                if (phid[i] <= 0.15):
-                    i = 0.15
+                if (phid[i] <= 0.1):
+                    i = 0.1
                     phidf.append(i)
-                elif (phid[i]) >= 0.6:
-                    i = 0.6
+                elif (phid[i]) >= 0.85:
+                    i = 0.85
                     phidf.append(i)
                 else:
                     i = phid[i]
