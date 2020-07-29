@@ -112,6 +112,8 @@ class FormationEvaluation:
         res = self.res
         cutoff = self.cutoff
 
+        df3 = data.copy()
+
         if baseline_default == True:
             cutoff_test = (data[gr].min() + data[gr].max() / 2)
             if cutoff_test > 80:
@@ -136,12 +138,13 @@ class FormationEvaluation:
             gr_cutoff = []
             
             for i in range(data.shape[0]):
-                if (data[gr].iloc[i] < cutoff_test):
-                    i = 1
-                    gr_cutoff.append(i)
-                else:
-                    i = 0
-                    gr_cutoff.append(i)
+                df3['litho'] = np.where(data[gr].iloc[i] < cutoff_test, 0, 1)
+                #if (data[gr].iloc[i] < cutoff_test):
+                #    i = 1
+                #    gr_cutoff.append(i)
+                #else:
+                #    i = 0
+                #    gr_cutoff.append(i)
 
             #To calculate volume of shale
             vsh = []
@@ -183,9 +186,7 @@ class FormationEvaluation:
                     i = 0
                     net.append(i)
                     
-            df3 = data.copy()
-                    
-            df3['litho'] = gr_cutoff
+            
             df3['Net_Pay'] = net
 
             #df3['litho'] = 0.5 * df3['litho']
@@ -194,24 +195,14 @@ class FormationEvaluation:
             #Calculating total formation porosity (phid)
             
             FL = 1
-            phid = [] 
 
             for i in range(df3.shape[0]):
-                i = (2.65 - df3[dens].iloc[i]) / (2.65 - FL)
-                phid.append(i)
+                df3['phid'] = (2.65 - df3[dens].iloc[i]) / (2.65 - FL)
                 
-            phidf = []
+            #Setting cutoff conditions for the porosity values
 
-            for i in range(0, df3.shape[0]):
-                if (phid[i] <= 0.1):
-                    i = 0.1
-                    phidf.append(i)
-                elif (phid[i]) >= 0.85:
-                    i = 0.85
-                    phidf.append(i)
-                else:
-                    i = phid[i]
-                    phidf.append(i)
+            df3['phidf'] = np.where(df3['phid'] <= 0.1, 0.1, df3['phid'])
+            df3['phidf'] = np.where(df3['phid'] >= 0.85, 0.85, df3['phid'])
 
                     
             #Calculating water saturation
@@ -221,7 +212,7 @@ class FormationEvaluation:
             for i in range(df3.shape[0]):
                 #i = np.sqrt(0.10 / (df3[res].iloc[i]) * (phidf[i] ** 1.74))
                 #if i == float('inf'):
-                j = np.sqrt(0.10/(df3[res].mean() * (phidf[i] ** 1.74)))
+                j = np.sqrt(0.10/(df3[res].mean() * (df3['phidf'].iloc[i] ** 1.74)))
                 if j < 0:
                     sw.append(j)
                 elif j > 1:
@@ -238,29 +229,17 @@ class FormationEvaluation:
                 oil_sat.append(i)
             
             df3['vsh'] = vsh
-            #df3['Net_Pay'] = net_pay
-            
-            #Calculate Net to Gross
-            #ntg = []
-            #for vsh in df3['vsh']:
-                #amount = 1 - vsh
-                #ntg.append(amount)
 
-            #df3['ntg'] = ntg
-            df3['phid'] = phid
-            df3['phidf'] = phidf
+            
             df3['sw'] = sw
             df3['oil_sat'] = oil_sat
 
             #effective porosity calculation
 
-            phie = []
             for i in range(df3.shape[0]):
-                reading = df3['phidf'].iloc[i] * df3['ntg'].iloc[i]
-                if reading < 0:
-                    phie.append(int(0))
-                else:
-                    phie.append(reading)
+                df3['phie'] = df3['phidf'].iloc[i] * df3['ntg'].iloc[i]
+                df3['phie'] = np.where(df3['phie'] < 0, 0, df3['phie'])
+                
             
             #return evaluated parameters
             
@@ -269,11 +248,9 @@ class FormationEvaluation:
             df4['GR'] = df3[gr]
             df4['LITHO'] = df3['litho']
             df4['VSH'] = df3['vsh']
-            #df4['NTG'] = df3['ntg']
             df4['NET_PAY'] = df3['Net_Pay']
-            #df4['PHID'] = df3['phid']
             df4['PHIDF'] = df3['phidf']
-            df4['PHIE'] = phie
+            df4['PHIE'] = df3['phie']
             df4['SW'] = df3['sw']
             df4['OIL_SAT'] = df3['oil_sat']
             
@@ -327,4 +304,5 @@ class FormationEvaluation:
         except ModuleNotFoundError as err:
             print (f'Install required module. {err}')
         
+
 

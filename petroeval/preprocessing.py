@@ -5,6 +5,7 @@ to avoid errors and glitches
 '''
 
 import pandas as pd
+import numpy as np
 
 def set_mnemonics(data, GR, NPHI, RHOB, RT):
     
@@ -52,12 +53,7 @@ def truncation(data, GR, truncate=True):
         pass
 
     else:
-        for ii in range(data.shape[0]):
-            if ii < 0:
-                data[GR].iloc[ii] = (data[GR].iloc[ii]/data[GR].min()) * 5
-            elif ii > 150:
-                data[GR].iloc[ii] = (data[GR].iloc[ii]/data[GR].max()) * 150
-            else:
-                pass
+        data[GR] = np.where(data[GR] < 0, 0, data[GR])
+        data[GR] = np.where(data[GR] > 150, 150, data[GR])
 
     return data
