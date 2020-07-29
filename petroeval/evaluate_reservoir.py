@@ -6,6 +6,7 @@ Author: Ibrahim Olawale
 import numpy as np
 import pandas as pd
 
+
 class FormationEvaluation:
     '''
     Class to evaluate a reservoir based on four main petrophysical parameters.
@@ -110,13 +111,13 @@ class FormationEvaluation:
         nphi = self.nphi
         dens = self.dens
         res = self.res
-        cutoff = self.cutoff
+        #cutoff = self.cutoff
 
         df3 = data.copy()
 
         if baseline_default == True:
             cutoff_test = (data[gr].min() + data[gr].max() / 2)
-            if cutoff_test > 80:
+            if cutoff_test >= 80:
                 cutoff_test = 80
                 print(f'Default baseline {cutoff_test} is used for evaluation')
             else:
@@ -135,16 +136,15 @@ class FormationEvaluation:
         
         
             #to classify each point as shale or sandstone based on the Gamma Ray readings
-            gr_cutoff = []
+            df3['litho'] = 0
             
             for i in range(data.shape[0]):
-                df3['litho'] = np.where(data[gr].iloc[i] < cutoff_test, 0, 1)
-                #if (data[gr].iloc[i] < cutoff_test):
-                #    i = 1
-                #    gr_cutoff.append(i)
-                #else:
-                #    i = 0
-                #    gr_cutoff.append(i)
+                df3['litho'].iloc[i] = np.where(data[gr].iloc[i] < cutoff_test, 0, 1)
+                if (data[gr].iloc[i] <= cutoff_test):
+                    df3['litho'].iloc[i] = 1
+                    
+                else:
+                    df3['litho'].iloc[i] = 0
 
             #To calculate volume of shale
             vsh = []
@@ -156,9 +156,7 @@ class FormationEvaluation:
 
                 IGR = (data[gr].iloc[i] - min_gr) / (max_gr - min_gr)
                 reading = 0.083 * ((2** (3.7 * IGR)) - 1)
-                #reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
-                
-                #To correct for negative volumes of shale as this is practically not correct
+
 
                 if reading < 0:
                     vsh.append(0)
@@ -168,15 +166,18 @@ class FormationEvaluation:
                 else:
                     vsh.append(reading)
 
-            #ntg = []
+            df3['vsh'] = vsh
 
+            ntg = []
+            for vsh_ in df3['vsh']:
+                amount = 1 - vsh_
+                ntg.append(amount)
 
-
+            df3['ntg'] = ntg
                     
             #Calculating Net Pay using GR and Porosity readings
             
             net = []
-            
 
             for i in range(data.shape[0]):
                 if (data[gr].iloc[i] < cutoff_test) and (data[nphi].iloc[i] > 0.25):
@@ -196,8 +197,9 @@ class FormationEvaluation:
             
             FL = 1
 
+            df3['phid'] = 0
             for i in range(df3.shape[0]):
-                df3['phid'] = (2.65 - df3[dens].iloc[i]) / (2.65 - FL)
+                df3['phid'].iloc[i] = (2.65 - df3[dens].iloc[i]) / (2.65 - FL)
                 
             #Setting cutoff conditions for the porosity values
 
@@ -235,9 +237,9 @@ class FormationEvaluation:
             df3['oil_sat'] = oil_sat
 
             #effective porosity calculation
-
+            df3['phie'] = 0
             for i in range(df3.shape[0]):
-                df3['phie'] = df3['phidf'].iloc[i] * df3['ntg'].iloc[i]
+                df3['phie'].iloc[i] = df3['phidf'].iloc[i] * df3['ntg'].iloc[i]
                 df3['phie'] = np.where(df3['phie'] < 0, 0, df3['phie'])
                 
             
