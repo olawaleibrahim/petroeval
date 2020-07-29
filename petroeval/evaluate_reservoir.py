@@ -111,13 +111,13 @@ class FormationEvaluation:
         nphi = self.nphi
         dens = self.dens
         res = self.res
-        #cutoff = self.cutoff
+        cutoff = self.cutoff
 
         df3 = data.copy()
 
         if baseline_default == True:
             cutoff_test = (data[gr].min() + data[gr].max() / 2)
-            if cutoff_test >= 80:
+            if cutoff_test > 80:
                 cutoff_test = 80
                 print(f'Default baseline {cutoff_test} is used for evaluation')
             else:
@@ -128,6 +128,9 @@ class FormationEvaluation:
             print(f'{cutoff_test} will be used for evaluation')
 
         try:
+            #converting resistivity values of 0 to 0.01
+            
+            data[self.res] = np.where(data[self.res]==0, 0.01, data[self.res])
             for i in range(data.shape[0]):
                 if data[self.res].iloc[i] == 0:
                     data[self.res].iloc[i] = 0.1
@@ -139,14 +142,12 @@ class FormationEvaluation:
             df3['litho'] = 0
             
             for i in range(data.shape[0]):
-                df3['litho'].iloc[i] = np.where(data[gr].iloc[i] < cutoff_test, 0, 1)
-                if (data[gr].iloc[i] <= cutoff_test):
+                
+                if (data[gr].iloc[i] < cutoff_test):
                     df3['litho'].iloc[i] = 1
-                    
                 else:
                     df3['litho'].iloc[i] = 0
 
-            #To calculate volume of shale
             vsh = []
 
             min_gr = data[gr].min()
@@ -156,7 +157,9 @@ class FormationEvaluation:
 
                 IGR = (data[gr].iloc[i] - min_gr) / (max_gr - min_gr)
                 reading = 0.083 * ((2** (3.7 * IGR)) - 1)
-
+                #reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
+                
+                #To correct for negative volumes of shale as this is practically not correct
 
                 if reading < 0:
                     vsh.append(0)
