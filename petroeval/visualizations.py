@@ -14,7 +14,7 @@ def summary(data):
     return data.describe()
 
 
-def log_plot(logs, GR=True, NPHI=True, RHOB=True, RT=True, no_plots=4):
+def log_plot(logs, top, base, GR=True, NPHI=True, RHOB=True, RT=True):
     
     '''
     Plot log signatures of petrophysical parameters.
@@ -54,16 +54,16 @@ def log_plot(logs, GR=True, NPHI=True, RHOB=True, RT=True, no_plots=4):
         #if number of plots is equal to four
         if no_plots == 4:
 
-            four_plots(logs)
+            four_plots(logs, top, base)
 
         #if number of plots is equal to four
         elif no_plots == 3:
             if GR and NPHI and RHOB:
-                three_plots(logs, 'GR', 'NPHI', 'RHOB')
+                three_plots(logs, 'GR', 'NPHI', 'RHOB', top, base)
             elif GR and NPHI and RT:
-                three_plots(logs, 'GR', 'NPHI', 'RT')
+                three_plots(logs, 'GR', 'NPHI', 'RT', top, base)
             elif GR and RHOB and RT:
-                three_plots(logs, 'GR', 'RHOB', 'RT')
+                three_plots(logs, 'GR', 'RHOB', 'RT', top, base)
             elif NPHI and RHOB and RT:
                 three_plots(logs, 'NPHI', 'RHOB', 'RT')
 
@@ -71,30 +71,30 @@ def log_plot(logs, GR=True, NPHI=True, RHOB=True, RT=True, no_plots=4):
         elif no_plots == 2:
 
             if GR and NPHI:
-                two_plots(logs, 'GR', 'NPHI')
+                two_plots(logs, 'GR', 'NPHI', top, base)
             elif GR and RHOB:
-                two_plots(logs, 'GR', 'RHOB')
+                two_plots(logs, 'GR', 'RHOB', top, base)
             elif GR and RT:
-                two_plots(logs, 'GR', 'RT')
+                two_plots(logs, 'GR', 'RT', top, base)
             elif NPHI and RHOB:
-                two_plots(logs, 'NPHI', 'RHOB')
+                two_plots(logs, 'NPHI', 'RHOB', top, base)
             elif NPHI and RT:
-                two_plots(logs, 'NPHI', 'RT')
+                two_plots(logs, 'NPHI', 'RT', top, base)
             elif RHOB and RT:
-                two_plots(logs, 'RHOB', 'RT')
+                two_plots(logs, 'RHOB', 'RT', top, base)
 
         #if number of plots is equal to 1 (possible combinations)
 
         elif no_plots == 1:
 
             if GR:
-                one_plot(logs, 'GR')
+                one_plot(logs, 'GR', top, base)
             elif NPHI:
-                one_plot(logs, 'NPHI')
+                one_plot(logs, 'NPHI', top, base)
             elif RHOB:
-                one_plot(logs, 'RHOB')
+                one_plot(logs, 'RHOB', top, base)
             else:
-                one_plot(logs, 'RT')
+                one_plot(logs, 'RT', top, base)
 
     
     except ModuleNotFoundError as err:

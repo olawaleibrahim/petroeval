@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def four_plots(logs, depth=False):
+def four_plots(logs, top, base, depth=False):
     
     '''
     Function to automatically plot well logs
@@ -23,18 +23,21 @@ def four_plots(logs, depth=False):
     try:
 
         logs = logs.sort_values(by='DEPTH')
-                    
-        top = logs.DEPTH.min()
-        bot = logs.DEPTH.max()
-                    
+
         f, ax = plt.subplots(nrows=1, ncols=4, figsize=(12,8))
+        for i in range(len(ax)):
+            ax[i].set_ylim(top, base)
+            ax[i].invert_yaxis()
+            ax[i].grid()
+
+        
         ax[0].plot(logs.GR, logs.DEPTH, color='black')
         ax[1].plot(logs.NPHI, logs.DEPTH, color='c')
         ax[2].plot(logs.RHOB, logs.DEPTH, color='blue')
         ax[3].plot(np.log(logs.RT), logs.DEPTH, color='red')
                     
         for i in range(len(ax)):
-            ax[i].set_ylim(top,bot)
+            ax[i].set_ylim(top, base)
             ax[i].invert_yaxis()
             ax[i].grid()
                         
@@ -57,7 +60,7 @@ def four_plots(logs, depth=False):
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def three_plots(logs, x1, x2, x3, depth=False):
+def three_plots(logs, x1, x2, x3, top, base, depth=False):
 
     '''
     Function to automatically plot well logs
@@ -80,17 +83,22 @@ def three_plots(logs, x1, x2, x3, depth=False):
 
         logs = logs.sort_values(by='DEPTH')
                     
-        top = logs.DEPTH.min()
-        bot = logs.DEPTH.max()
+        #top = logs.DEPTH.min()
+        #bot = logs.DEPTH.max()
                     
         f, ax = plt.subplots(nrows=1, ncols=3, figsize=(10,8))
+
+        for i in range(len(ax)):
+            ax[i].set_ylim(top, base)
+            ax[i].invert_yaxis()
+            ax[i].grid()
         
         ax[0].plot(logs[x1], logs.DEPTH, color='black')
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
         ax[2].plot(logs[x3], logs.DEPTH, color='blue')
                     
         for i in range(len(ax)):
-            ax[i].set_ylim(top,bot)
+            ax[i].set_ylim(top, base)
             ax[i].invert_yaxis()
             ax[i].grid()
                         
@@ -110,7 +118,7 @@ def three_plots(logs, x1, x2, x3, depth=False):
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def two_plots(logs, x1, x2, depth=False):
+def two_plots(logs, x1, x2, top, base, depth=False):
 
     '''
     Function to automatically plot well logs
@@ -133,16 +141,18 @@ def two_plots(logs, x1, x2, depth=False):
 
         logs = logs.sort_values(by='DEPTH')
                     
-        top = logs.DEPTH.min()
-        bot = logs.DEPTH.max()
-                    
         f, ax = plt.subplots(nrows=1, ncols=2, figsize=(8,10))
+
+        for i in range(len(ax)):
+            ax[i].set_ylim(top, base)
+            ax[i].invert_yaxis()
+            ax[i].grid()
         
         ax[0].plot(logs[x1], logs.DEPTH, color='black')
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
                     
         for i in range(len(ax)):
-            ax[i].set_ylim(top,bot)
+            ax[i].set_ylim(top, base)
             ax[i].invert_yaxis()
             ax[i].grid()
                         
@@ -159,7 +169,7 @@ def two_plots(logs, x1, x2, depth=False):
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def one_plot(logs, x1, depth=False):
+def one_plot(logs, x1, top, base, depth=False):
 
     '''
     Function to automatically plot a single well log
@@ -181,13 +191,11 @@ def one_plot(logs, x1, depth=False):
 
         logs = logs.sort_values(by='DEPTH')
                     
-        top = logs.DEPTH.min()
-        bot = logs.DEPTH.max()
                     
         f, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,10))
-        ax.plot(logs[x1], logs.DEPTH, color='black')
         
-        ax.set_ylim(top,bot)
+        ax.set_ylim(top, base)
+        ax.plot(logs[x1], logs.DEPTH, color='black')
         ax.invert_yaxis()
         ax.grid()
                         
