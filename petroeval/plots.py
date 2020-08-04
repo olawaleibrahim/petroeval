@@ -51,6 +51,7 @@ def four_plots(logs, top, base, depth=False):
         ax[2].set_xlim(logs.RHOB.min(),logs.RHOB.max())
         ax[2].set_title(f"Plot of Depth Against Density")
         ax[3].set_xlabel("RT (ohm.m)")
+        ax[3].set_xscale("log")
         ax[3].set_xlim(logs.RT.min(), logs.RT.max())
         ax[3].set_title(f"Plot of Depth Against Resistivity")
         
@@ -68,20 +69,6 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
           logs: Dataframe object of well logs
           depth: Set to false or leave as default to use dataframe index
                  Set to column title if column depth should be used
-    
-    #Converting the values of the resistivity logs to log scale
-    if x1 == 'RT':
-        logs[x1] = np.log(logs[x1])
-        #logs[x1] = logs[x1].replace({np.Inf:0, np.nan:0}, inplace=False)
-
-    if x2 == 'RT':
-        logs[x2] = np.log(logs[x2])
-        #logs[x2] = logs[x2].replace({np.Inf:0, np.nan:0}, inplace=False)
-
-
-    if x3 == 'RT':
-        logs[x3] = np.log(logs[x3])
-        #logs[x3] = logs[x3].replace({np.Inf:0, np.nan:0}, inplace=False)
 
     '''
 
@@ -116,13 +103,19 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
         ax[2].plot(logs[x3], logs.DEPTH, color='blue')
                     
         ax[0].set_xlabel(f"{x1}  ")
+        if x1 == 'RT':
+            ax[0].set_xscale("log")
         ax[0].set_xlim(logs[x1].min(), logs[x1].max())
         ax[0].set_ylabel("Depth(ft)")
         ax[0].set_title(f"Plot of Depth Against {x1}")
         ax[1].set_xlabel(f"{x2} ")
+        if x2 == 'RT':
+            ax[1].set_xscale("log")
         ax[1].set_xlim(logs[x2].min(),logs[x2].max())
         ax[1].set_title(f"Plot of Depth Against {x2}")
         ax[2].set_xlabel(f"{x3}")
+        if x3 == 'RT':
+            ax[2].set_xscale("log")
         ax[2].set_xlim(logs[x3].min(),logs[x3].max())
         ax[2].set_title(f"Plot of Depth Against {x3}")
                     
@@ -180,10 +173,14 @@ def two_plots(logs, x1, x2, top, base, depth=False):
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
                         
         ax[0].set_xlabel(f"{x1}  ")
+        if x1 == 'RT':
+            ax[0].set_xscale("log")
         ax[0].set_xlim(logs[x1].min(), logs[x1].max())
         ax[0].set_ylabel("Depth(ft)")
         ax[0].set_title(f"Plot of Depth Against {x1}")
         ax[1].set_xlabel(f"{x2}  ")
+        if x2 == 'RT':
+            ax[1].set_xscale("log")
         ax[1].set_xlim(logs[x2].min(),logs[x2].max())
         ax[1].set_title(f"Plot of Depth Against {x2}")
                     
@@ -235,6 +232,8 @@ def one_plot(logs, x1, top, base, depth=False):
         ax.locator_params(axis='x', nbins=4)
                         
         ax.set_xlabel(f"{x1}")
+        if x1 == 'RT':
+            ax.set_xscale("log")
         ax.set_xlim(logs[x1].min(), logs[x1].max())
         ax.set_ylabel("Depth(ft)")
         ax.set_title(f"Plot of Depth Against {x1}")

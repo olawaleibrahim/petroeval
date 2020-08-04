@@ -13,24 +13,24 @@ class FormationEvaluation:
     Creates an instance of the reservoir to be evaluated
     args::
         data: dataframe  or csv format of data
-        gr: gamma ray column of table
-        nphi: neutron porosity column title
-        dens: density column title
-        res: resistivity column title
+        GR: gamma ray column of table
+        NPHI: neutron porosity column title
+        RHOB: density column title
+        RT: resistivity column title
         top: top of reservoir (in, metres, feets)
-        bottom: bottom of reservoir (in, metres, feets)
+        base: base of reservoir (in, metres, feets)
         cutoff: Shale baseline value in API
     '''
 
-    def __init__(self, data, gr, nphi, dens, res, top, bottom, cutoff):
+    def __init__(self, data, GR, NPHI, RHOB, RT, top, base, cutoff):
         try:
             self.data = data
-            self.gr = str(gr)
-            self.nphi = str(nphi)
-            self.dens = str(dens)
-            self.res = str(res)
+            self.GR = str(GR)
+            self.NPHI = str(NPHI)
+            self.RHOB = str(RHOB)
+            self.RT = str(RT)
             self.top = top
-            self.bottom = bottom
+            self.base = base
             self.cutoff = cutoff
             
         except ValueError as err:
@@ -104,19 +104,19 @@ class FormationEvaluation:
         '''
 
         top = self.top
-        bottom = self.bottom
-        bottom = bottom + 1
-        data = self.data.iloc[top:bottom]
-        gr = self.gr
-        nphi = self.nphi
-        dens = self.dens
-        res = self.res
+        base = self.base
+        base = base + 1
+        data = self.data.iloc[top:base]
+        GR = self.GR
+        NPHI = self.NPHI
+        RHOB = self.RHOB
+        RT = self.RT
         cutoff = self.cutoff
 
         df3 = data.copy()
 
         if baseline_default == True:
-            cutoff_test = (data[gr].min() + data[gr].max() / 2)
+            cutoff_test = (data[GR].min() + data[GR].max() / 2)
             if cutoff_test > 80:
                 cutoff_test = 80
                 print(f'Default baseline {cutoff_test} is used for evaluation')
@@ -130,12 +130,12 @@ class FormationEvaluation:
         try:
             #converting resistivity values of 0 to 0.01
             
-            data[self.res] = np.where(data[self.res]==0, 0.01, data[self.res])
+            data[self.RT] = np.where(data[self.RT]==0, 0.01, data[self.RT])
             for i in range(data.shape[0]):
-                if data[self.res].iloc[i] == 0:
-                    data[self.res].iloc[i] = 0.1
+                if data[self.RT].iloc[i] == 0:
+                    data[self.RT].iloc[i] = 0.1
                 else:
-                    data[self.res].iloc[i] == data[self.res].iloc[i]
+                    data[self.RT].iloc[i] == data[self.RT].iloc[i]
         
         
             #to classify each point as shale or sandstone based on the Gamma Ray readings
@@ -143,21 +143,21 @@ class FormationEvaluation:
             
             for i in range(data.shape[0]):
                 
-                if (data[gr].iloc[i] < cutoff_test):
+                if (data[GR].iloc[i] < cutoff_test):
                     df3['litho'].iloc[i] = 1
                 else:
                     df3['litho'].iloc[i] = 0
 
             vsh = []
 
-            min_gr = data[gr].min()
-            max_gr = data[gr].max()
+            min_GR = data[GR].min()
+            max_GR = data[GR].max()
 
             for i in range(data.shape[0]):
 
-                IGR = (data[gr].iloc[i] - min_gr) / (max_gr - min_gr)
+                IGR = (data[GR].iloc[i] - min_GR) / (max_GR - min_GR)
                 reading = 0.083 * ((2** (3.7 * IGR)) - 1)
-                #reading = (((3.7 * (data[gr].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
+                #reading = (((3.7 * (data[GR].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
                 
                 #To correct for negative volumes of shale as this is practically not correct
 
@@ -183,7 +183,7 @@ class FormationEvaluation:
             net = []
 
             for i in range(data.shape[0]):
-                if (data[gr].iloc[i] < cutoff_test) and (data[nphi].iloc[i] > 0.25):
+                if (data[GR].iloc[i] < cutoff_test) and (data[NPHI].iloc[i] > 0.25):
                     i = 1
                     net.append(i)
                 else:
@@ -202,7 +202,7 @@ class FormationEvaluation:
 
             df3['phid'] = 0
             for i in range(df3.shape[0]):
-                df3['phid'].iloc[i] = (2.65 - df3[dens].iloc[i]) / (2.65 - FL)
+                df3['phid'].iloc[i] = (2.65 - df3[RHOB].iloc[i]) / (2.65 - FL)
                 
             #Setting cutoff conditions for the porosity values
 
@@ -215,9 +215,9 @@ class FormationEvaluation:
             sw = []
             
             for i in range(df3.shape[0]):
-                #i = np.sqrt(0.10 / (df3[res].iloc[i]) * (phidf[i] ** 1.74))
+                #i = np.sqrt(0.10 / (df3[RT].iloc[i]) * (phidf[i] ** 1.74))
                 #if i == float('inf'):
-                j = np.sqrt(0.10/(df3[res].mean() * (df3['phidf'].iloc[i] ** 1.74)))
+                j = np.sqrt(0.10/(df3[RT].mean() * (df3['phidf'].iloc[i] ** 1.74)))
                 if j < 0:
                     sw.append(j)
                 elif j > 1:
@@ -250,7 +250,7 @@ class FormationEvaluation:
             
             df4 = pd.DataFrame()
             #df4['Depth'] = df3.index
-            df4['GR'] = df3[gr]
+            df4['GR'] = df3[GR]
             df4['LITHO'] = df3['litho']
             df4['VSH'] = df3['vsh']
             df4['NET_PAY'] = df3['Net_Pay']
