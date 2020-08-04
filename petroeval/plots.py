@@ -53,8 +53,7 @@ def four_plots(logs, top, base, depth=False):
         ax[3].set_xlabel("RT (ohm.m)")
         ax[3].set_xlim(logs.RT.min(), logs.RT.max())
         ax[3].set_title(f"Plot of Depth Against Resistivity")
-                    
-        f.suptitle('Log Plots, fontsize=14,y=0.94')
+        
                 
     except NameError as err:
         print(f'Depth column could not be located. {err}')
