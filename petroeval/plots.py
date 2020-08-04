@@ -19,46 +19,46 @@ def four_plots(logs, top, base, depth=False):
         depth = np.array(logs[depth])
         logs = logs.reset_index(drop=True)
         logs['DEPTH'] = depth
+
+    logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
             
     try:
 
         logs = logs.sort_values(by='DEPTH')
 
-        f, ax = plt.subplots(nrows=1, ncols=4, figsize=(12,8))
+        f, ax = plt.subplots(nrows=1, ncols=4, figsize=(12,15))
+
         for i in range(len(ax)):
             ax[i].set_ylim(top, base)
             ax[i].invert_yaxis()
             ax[i].grid()
+            ax[i].locator_params(axis='x', nbins=4)
 
         
         ax[0].plot(logs.GR, logs.DEPTH, color='black')
         ax[1].plot(logs.NPHI, logs.DEPTH, color='c')
         ax[2].plot(logs.RHOB, logs.DEPTH, color='blue')
-        ax[3].plot(np.log(logs.RT), logs.DEPTH, color='red')
+        ax[3].plot(logs.RT, logs.DEPTH, color='red')
                     
-        for i in range(len(ax)):
-            ax[i].set_ylim(top, base)
-            ax[i].invert_yaxis()
-            ax[i].grid()
-                        
-            ax[0].set_xlabel("GR (API)")
-            ax[0].set_xlim(logs.GR.min(), 200)
-            ax[0].set_ylabel("Depth(ft)")
-            ax[0].set_title(f"Plot of Depth Against GR")
-            ax[1].set_xlabel("NPHI (v/v)")
-            ax[1].set_xlim(logs.NPHI.min(),logs.NPHI.max())
-            ax[1].set_title(f"Plot of Depth Against Neutron Porosity")
-            ax[2].set_xlabel("RHOB (g/cm3)")
-            ax[2].set_xlim(logs.RHOB.min(),logs.RHOB.max())
-            ax[2].set_title(f"Plot of Depth Against Density")
-            ax[3].set_xlabel("RT (ohm.m)")
-            ax[3].set_xlim(-2,np.log(logs.RT.max()))
-            ax[3].set_title(f"Plot of Depth Against Resistivity")
+        ax[0].set_xlabel("GR (API)")
+        ax[0].set_xlim(logs.GR.min(), logs.GR.max())
+        ax[0].set_ylabel("Depth(ft)")
+        ax[0].set_title(f"Plot of Depth Against GR")
+        ax[1].set_xlabel("NPHI (v/v)")
+        ax[1].set_xlim(logs.NPHI.min(),logs.NPHI.max())
+        ax[1].set_title(f"Plot of Depth Against Neutron Porosity")
+        ax[2].set_xlabel("RHOB (g/cm3)")
+        ax[2].set_xlim(logs.RHOB.min(),logs.RHOB.max())
+        ax[2].set_title(f"Plot of Depth Against Density")
+        ax[3].set_xlabel("RT (ohm.m)")
+        ax[3].set_xlim(logs.RT.min(), logs.RT.max())
+        ax[3].set_title(f"Plot of Depth Against Resistivity")
                     
-            f.suptitle('Log Plots, fontsize=14,y=0.94')
+        f.suptitle('Log Plots, fontsize=14,y=0.94')
                 
     except NameError as err:
         print(f'Depth column could not be located. {err}')
+
 
 def three_plots(logs, x1, x2, x3, top, base, depth=False):
 
@@ -69,8 +69,24 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
           logs: Dataframe object of well logs
           depth: Set to false or leave as default to use dataframe index
                  Set to column title if column depth should be used
+    
+    #Converting the values of the resistivity logs to log scale
+    if x1 == 'RT':
+        logs[x1] = np.log(logs[x1])
+        #logs[x1] = logs[x1].replace({np.Inf:0, np.nan:0}, inplace=False)
+
+    if x2 == 'RT':
+        logs[x2] = np.log(logs[x2])
+        #logs[x2] = logs[x2].replace({np.Inf:0, np.nan:0}, inplace=False)
+
+
+    if x3 == 'RT':
+        logs[x3] = np.log(logs[x3])
+        #logs[x3] = logs[x3].replace({np.Inf:0, np.nan:0}, inplace=False)
+
     '''
 
+    #Setting the value of the y axis. Using index or property specified
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
@@ -78,6 +94,8 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
         depth = np.array(logs[depth])
         logs = logs.reset_index(drop=True)
         logs['DEPTH'] = depth
+
+    logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
             
     try:
 
@@ -86,37 +104,33 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
         #top = logs.DEPTH.min()
         #bot = logs.DEPTH.max()
                     
-        f, ax = plt.subplots(nrows=1, ncols=3, figsize=(10,8))
+        f, ax = plt.subplots(nrows=1, ncols=3, figsize=(10,15))
 
         for i in range(len(ax)):
             ax[i].set_ylim(top, base)
             ax[i].invert_yaxis()
             ax[i].grid()
+            ax[i].locator_params(axis='x', nbins=4)
         
         ax[0].plot(logs[x1], logs.DEPTH, color='black')
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
         ax[2].plot(logs[x3], logs.DEPTH, color='blue')
                     
-        for i in range(len(ax)):
-            ax[i].set_ylim(top, base)
-            ax[i].invert_yaxis()
-            ax[i].grid()
-                        
-            ax[0].set_xlabel(f"{x1}  ")
-            ax[0].set_xlim(logs[x1].min(), logs[x1].max())
-            ax[0].set_ylabel("Depth(ft)")
-            ax[0].set_title(f"Plot of Depth Against {x1}")
-            ax[1].set_xlabel(f"{x2} ")
-            ax[1].set_xlim(logs[x2].min(),logs[x2].max())
-            ax[1].set_title(f"Plot of Depth Against {x2}")
-            ax[2].set_xlabel(f"{x3}")
-            ax[2].set_xlim(logs[x3].min(),logs[x3].max())
-            ax[2].set_title(f"Plot of Depth Against {x3}")
+        ax[0].set_xlabel(f"{x1}  ")
+        ax[0].set_xlim(logs[x1].min(), logs[x1].max())
+        ax[0].set_ylabel("Depth(ft)")
+        ax[0].set_title(f"Plot of Depth Against {x1}")
+        ax[1].set_xlabel(f"{x2} ")
+        ax[1].set_xlim(logs[x2].min(),logs[x2].max())
+        ax[1].set_title(f"Plot of Depth Against {x2}")
+        ax[2].set_xlabel(f"{x3}")
+        ax[2].set_xlim(logs[x3].min(),logs[x3].max())
+        ax[2].set_title(f"Plot of Depth Against {x3}")
                     
-            #f.suptitle('Log Plots, fontsize=14,y=0.94')
                 
     except NameError as err:
         print(f'Depth column could not be located. {err}')
+
 
 def two_plots(logs, x1, x2, top, base, depth=False):
 
@@ -127,8 +141,20 @@ def two_plots(logs, x1, x2, top, base, depth=False):
           logs: Dataframe object of well logs
           depth: Set to false or leave as default to use dataframe index
                  Set to column title if column depth should be used
+    
+
+    #Converting the values of the resistivity logs to log scale
+    if x1 == 'RT':
+        logs[x1] = np.log(logs[x1])
+        #logs[x1] = logs[x1].replace({np.Inf:0, np.nan:0}, inplace=False)
+
+    if x2 == 'RT':
+        logs[x2] = np.log(logs[x2])
+        #logs[x2] = logs[x2].replace({np.Inf:0, np.nan:0}, inplace=False)
+
     '''
 
+    #Setting the value of the y axis. Using index or property specified
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
@@ -136,38 +162,36 @@ def two_plots(logs, x1, x2, top, base, depth=False):
         depth = np.array(logs[depth])
         logs = logs.reset_index(drop=True)
         logs['DEPTH'] = depth
+
+    logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
             
     try:
 
         logs = logs.sort_values(by='DEPTH')
                     
-        f, ax = plt.subplots(nrows=1, ncols=2, figsize=(8,10))
+        f, ax = plt.subplots(nrows=1, ncols=2, figsize=(8,15))
 
         for i in range(len(ax)):
             ax[i].set_ylim(top, base)
             ax[i].invert_yaxis()
             ax[i].grid()
+            ax[i].locator_params(axis='x', nbins=4)
         
         ax[0].plot(logs[x1], logs.DEPTH, color='black')
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
-                    
-        for i in range(len(ax)):
-            ax[i].set_ylim(top, base)
-            ax[i].invert_yaxis()
-            ax[i].grid()
                         
-            ax[0].set_xlabel(f"{x1}  ")
-            ax[0].set_xlim(logs[x1].min(), logs[x1].max())
-            ax[0].set_ylabel("Depth(ft)")
-            ax[0].set_title(f"Plot of Depth Against {x1}")
-            ax[1].set_xlabel(f"{x2}  ")
-            ax[1].set_xlim(logs[x2].min(),logs[x2].max())
-            ax[1].set_title(f"Plot of Depth Against {x2}")
+        ax[0].set_xlabel(f"{x1}  ")
+        ax[0].set_xlim(logs[x1].min(), logs[x1].max())
+        ax[0].set_ylabel("Depth(ft)")
+        ax[0].set_title(f"Plot of Depth Against {x1}")
+        ax[1].set_xlabel(f"{x2}  ")
+        ax[1].set_xlim(logs[x2].min(),logs[x2].max())
+        ax[1].set_title(f"Plot of Depth Against {x2}")
                     
-            #f.suptitle('Log Plots, fontsize=14,y=0.94')
                 
     except NameError as err:
         print(f'Depth column could not be located. {err}')
+
 
 def one_plot(logs, x1, top, base, depth=False):
 
@@ -177,8 +201,16 @@ def one_plot(logs, x1, top, base, depth=False):
           logs: Dataframe object of well logs
           depth: Set to false or leave as default to use dataframe index
                  Set to column title if column depth should be used
+    
+
+    #Converting the values of the resistivity logs to log scale
+    if x1 == 'RT':
+        logs[x1] = np.log(logs[x1])
+        #logs[x1] = logs[x1].replace({np.Inf:0, np.nan:0}, inplace=False)
+
     '''
 
+    #Setting the value of the y axis. Using index or property specified   
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
@@ -186,27 +218,29 @@ def one_plot(logs, x1, top, base, depth=False):
         depth = np.array(logs[depth])
         logs = logs.reset_index(drop=True)
         logs['DEPTH'] = depth
+
+    logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
             
     try:
 
         logs = logs.sort_values(by='DEPTH')
                     
                     
-        f, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,10))
+        f, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,15))
+        ax.plot(logs[x1], logs.DEPTH, color='black')
         
         ax.set_ylim(top, base)
         ax.plot(logs[x1], logs.DEPTH, color='black')
         ax.invert_yaxis()
         ax.grid()
+        ax.locator_params(axis='x', nbins=4)
                         
         ax.set_xlabel(f"{x1}")
         ax.set_xlim(logs[x1].min(), logs[x1].max())
         ax.set_ylabel("Depth(ft)")
         ax.set_title(f"Plot of Depth Against {x1}")
-                    
-        #ax.set_yticklabels([])
-                    
-        #f.suptitle('Log Plots, fontsize=14,y=0.94')
                 
     except NameError as err:
         print(f'Depth column could not be located. {err}')
+
+    logs[x1] = np.log10(logs[x1])
