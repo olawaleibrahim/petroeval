@@ -61,7 +61,7 @@ def four_plot(logs, top, base, depth=False):
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
+def four_plots(logs, x1, x2, x3, x4, top, base, depth=False, scale=False):
 
     '''
     Function to automatically plot well logs
@@ -83,70 +83,122 @@ def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
         logs['DEPTH'] = depth
 
     logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
+
+    if scale == True:  
+
+        try:
+
+            logs = logs.sort_values(by='DEPTH')
+                        
+            #top = logs.DEPTH.min()
+            #bot = logs.DEPTH.max()
+                        
+            f, ax = plt.subplots(nrows=1, ncols=4, figsize=(10,10))
+
+            for i in range(len(ax)):
+                ax[i].set_ylim(top, base)
+                ax[i].invert_yaxis()
+                ax[i].grid()
+                ax[i].locator_params(axis='x', nbins=4)
+
+            if (logs[x1].min() < logs[x2].min()) or (logs[x1].min() < logs[x3].min()) or (logs[x1].min() < logs[x4].min()):
+                x_min=logs[x1].min()
+            elif (logs[x2].min() < logs[x1].min()) or (logs[x2].min() < logs[x3].min() or (logs[x2].min() < logs[x4].min())):
+                x_min=logs[x2].min()
+            elif (logs[x3].min() < logs[x1].min()) or (logs[x3].min() < logs[x2].min() or (logs[x3].min() < logs[x4].min())):
+                x_min=logs[x3].min()
+            else:
+                x_min=logs[x4].min()
+                    
+            if (logs[x1].max() < logs[x2].max()) or (logs[x1].max() < logs[x3].max()) or (logs[x1].max() < logs[x4].max()):
+                x_max=logs[x1].max()
+            elif (logs[x2].max() < logs[x1].max()) or (logs[x2].max() < logs[x3].max() or (logs[x2].max() < logs[x4].max())):
+                x_max=logs[x2].max()
+            elif (logs[x3].max() < logs[x1].max()) or (logs[x3].max() < logs[x2].max() or (logs[x3].max() < logs[x4].max())):
+                x_max=logs[x3].max()
+            else:
+                x_max=logs[x4].max()
             
-    try:
+            ax[0].plot(logs[x1], logs.DEPTH, color='black')
+            ax[1].plot(logs[x2], logs.DEPTH, color='c')
+            ax[2].plot(logs[x3], logs.DEPTH, color='blue')
+            ax[3].plot(logs[x4], logs.DEPTH, color='red')
+                        
+            ax[0].set_xlabel(f"{x1}  ")
+            if x1 == 'RT':
+                ax[0].set_xscale("log")
+            ax[0].set_xlim(x_min, x_max)
+            ax[0].set_ylabel("Depth(ft)")
+            ax[0].set_title(f"Plot of Depth Against {x1}")
+            ax[1].set_xlabel(f"{x2} ")
+            if x2 == 'RT':
+                ax[1].set_xscale("log")
+            ax[1].set_xlim(x_min,x_max)
+            ax[1].set_title(f"Plot of Depth Against {x2}")
+            ax[2].set_xlabel(f"{x3}")
+            if x3 == 'RT':
+                ax[2].set_xscale("log")
+            ax[2].set_xlim(x_min,x_max)
+            ax[2].set_title(f"Plot of Depth Against {x3}")
+            if x4 == 'RT':
+                ax[3].set_xscale("log")
+            ax[3].set_xlim(x_min,x_max)
+            ax[3].set_title(f"Plot of Depth Against {x4}")
+            ax[3].set_xlabel(f"{x4}")
+                        
+                    
+        except NameError as err:
+            print(f'Depth column could not be located. {err}')
 
-        logs = logs.sort_values(by='DEPTH')
-                    
-        #top = logs.DEPTH.min()
-        #bot = logs.DEPTH.max()
-                    
-        f, ax = plt.subplots(nrows=1, ncols=4, figsize=(10,10))
+    elif scale == False:
 
-        for i in range(len(ax)):
-            ax[i].set_ylim(top, base)
-            ax[i].invert_yaxis()
-            ax[i].grid()
-            ax[i].locator_params(axis='x', nbins=4)
+        try:
 
-        if (logs[x1].min() < logs[x2].min()) or (logs[x1].min() < logs[x3].min()) or (logs[x1].min() < logs[x4].min()):
-            x_min=logs[x1].min()
-        elif (logs[x2].min() < logs[x1].min()) or (logs[x2].min() < logs[x3].min() or (logs[x2].min() < logs[x4].min())):
-            x_min=logs[x2].min()
-        elif (logs[x3].min() < logs[x1].min()) or (logs[x3].min() < logs[x2].min() or (logs[x3].min() < logs[x4].min())):
-            x_min=logs[x3].min()
-        else:
-            x_min=logs[x4].min()
-                
-        if (logs[x1].max() < logs[x2].max()) or (logs[x1].max() < logs[x3].max()) or (logs[x1].max() < logs[x4].max()):
-            x_max=logs[x1].max()
-        elif (logs[x2].max() < logs[x1].max()) or (logs[x2].max() < logs[x3].max() or (logs[x2].max() < logs[x4].max())):
-            x_max=logs[x2].max()
-        elif (logs[x3].max() < logs[x1].max()) or (logs[x3].max() < logs[x2].max() or (logs[x3].max() < logs[x4].max())):
-            x_max=logs[x3].max()
-        else:
-            x_max=logs[x4].max()
-        
-        ax[0].plot(logs[x1], logs.DEPTH, color='black')
-        ax[1].plot(logs[x2], logs.DEPTH, color='c')
-        ax[2].plot(logs[x3], logs.DEPTH, color='blue')
-        ax[3].plot(logs[x4], logs.DEPTH, color='red')
+            logs = logs.sort_values(by='DEPTH')
+                        
+            #top = logs.DEPTH.min()
+            #bot = logs.DEPTH.max()
+                        
+            f, ax = plt.subplots(nrows=1, ncols=4, figsize=(10,10))
+
+            for i in range(len(ax)):
+                ax[i].set_ylim(top, base)
+                ax[i].invert_yaxis()
+                ax[i].grid()
+                ax[i].locator_params(axis='x', nbins=4)
+            
+            ax[0].plot(logs[x1], logs.DEPTH, color='black')
+            ax[1].plot(logs[x2], logs.DEPTH, color='c')
+            ax[2].plot(logs[x3], logs.DEPTH, color='blue')
+            ax[3].plot(logs[x4], logs.DEPTH, color='red')
+                        
+            ax[0].set_xlabel(f"{x1}  ")
+            if x1 == 'RT':
+                ax[0].set_xscale("log")
+            ax[0].set_xlim(logs[x1].min(), logs[x1].max())
+            ax[0].set_ylabel("Depth(ft)")
+            ax[0].set_title(f"Plot of Depth Against {x1}")
+            ax[1].set_xlabel(f"{x2} ")
+            if x2 == 'RT':
+                ax[1].set_xscale("log")
+            ax[1].set_xlim(logs[x2].min(),logs[x2].max())
+            ax[1].set_title(f"Plot of Depth Against {x2}")
+            ax[2].set_xlabel(f"{x3}")
+            if x3 == 'RT':
+                ax[2].set_xscale("log")
+            ax[2].set_xlim(logs[x3].min(),logs[x3].max())
+            ax[2].set_title(f"Plot of Depth Against {x3}")
+            if x4 == 'RT':
+                ax[3].set_xscale("log")
+            ax[3].set_xlim(logs[x3].min(),logs[x3].max())
+            ax[3].set_title(f"Plot of Depth Against {x4}")
+            ax[3].set_xlabel(f"{x3}")
                     
-        ax[0].set_xlabel(f"{x1}  ")
-        if x1 == 'RT':
-            ax[0].set_xscale("log")
-        ax[0].set_xlim(logs[x1].min(), logs[x1].max())
-        ax[0].set_ylabel("Depth(ft)")
-        ax[0].set_title(f"Plot of Depth Against {x1}")
-        ax[1].set_xlabel(f"{x2} ")
-        if x2 == 'RT':
-            ax[1].set_xscale("log")
-        ax[1].set_xlim(logs[x2].min(),logs[x2].max())
-        ax[1].set_title(f"Plot of Depth Against {x2}")
-        ax[2].set_xlabel(f"{x3}")
-        if x3 == 'RT':
-            ax[2].set_xscale("log")
-        ax[2].set_xlim(logs[x3].min(),logs[x3].max())
-        ax[2].set_title(f"Plot of Depth Against {x3}")
-        if x4 == 'RT':
-            ax[3].set_xscale("log")
-        ax[3].set_xlim(logs[x3].min(),logs[x3].max())
-        ax[3].set_title(f"Plot of Depth Against {x4}")
-        ax[3].set_xlabel(f"{x3}")
-                    
-                
-    except NameError as err:
-        print(f'Depth column could not be located. {err}')
+        except NameError as err:
+            print(f'Depth column could not be located. {err}')
+
+    else:
+        print(f'scale attribute takes in only True or False')
 
 def three_plots(logs, x1, x2, x3, top, base, depth=False, scale=False):
 
@@ -171,60 +223,107 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False, scale=False):
         logs['DEPTH'] = depth
 
     logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
+
+    if scale==True:
             
-    try:
+        try:
 
-        logs = logs.sort_values(by='DEPTH')
+            logs = logs.sort_values(by='DEPTH')
+                        
+            #top = logs.DEPTH.min()
+            #bot = logs.DEPTH.max()
+                        
+            f, ax = plt.subplots(nrows=1, ncols=3, figsize=(10,10))
+
+            for i in range(len(ax)):
+                ax[i].set_ylim(top, base)
+                ax[i].invert_yaxis()
+                ax[i].grid()
+                ax[i].locator_params(axis='x', nbins=4)
+
+            if (logs[x1].min() < logs[x2].min()) or (logs[x1].min() < logs[x3].min()):
+                x_min=logs[x1].min()
+            elif (logs[x2].min() < logs[x1].min()) or (logs[x2].min() < logs[x3].min()):
+                x_min=logs[x2].min()
+            else:
+                x_min=logs[x3].min()
                     
-        #top = logs.DEPTH.min()
-        #bot = logs.DEPTH.max()
+            if (logs[x1].max() < logs[x2].max()) or (logs[x1].max() < logs[x3].max()):
+                x_max=logs[x1].max()
+            elif (logs[x2].max() < logs[x1].max()) or (logs[x2].max() < logs[x3].max()):
+                x_max=logs[x2].max()
+            else:
+                x_max=logs[x3].max()
+            
+            ax[0].plot(logs[x1], logs.DEPTH, color='black')
+            ax[1].plot(logs[x2], logs.DEPTH, color='c')
+            ax[2].plot(logs[x3], logs.DEPTH, color='blue')
+                        
+            ax[0].set_xlabel(f"{x1}  ")
+            if x1 == 'RT':
+                ax[0].set_xscale("log")
+            ax[0].set_xlim(x_min, x_max)
+            ax[0].set_ylabel("Depth(ft)")
+            ax[0].set_title(f"Plot of Depth Against {x1}")
+            ax[1].set_xlabel(f"{x2} ")
+            if x2 == 'RT':
+                ax[1].set_xscale("log")
+            ax[1].set_xlim(x_min, x_max)
+            ax[1].set_title(f"Plot of Depth Against {x2}")
+            ax[2].set_xlabel(f"{x3}")
+            if x3 == 'RT':
+                ax[2].set_xscale("log")
+            ax[2].set_xlim(x_min, x_max)
+            ax[2].set_title(f"Plot of Depth Against {x3}")
+                        
                     
-        f, ax = plt.subplots(nrows=1, ncols=3, figsize=(10,10))
+        except NameError as err:
+            print(f'Depth column could not be located. {err}')
 
-        for i in range(len(ax)):
-            ax[i].set_ylim(top, base)
-            ax[i].invert_yaxis()
-            ax[i].grid()
-            ax[i].locator_params(axis='x', nbins=4)
+    elif scale == False:
 
-        if (logs[x1].min() < logs[x2].min()) or (logs[x1].min() < logs[x3].min()):
-            x_min=logs[x1].min()
-        elif (logs[x2].min() < logs[x1].min()) or (logs[x2].min() < logs[x3].min()):
-            x_min=logs[x2].min()
-        else:
-            x_min=logs[x3].min()
+        try:
+
+            logs = logs.sort_values(by='DEPTH')
+                        
+            #top = logs.DEPTH.min()
+            #bot = logs.DEPTH.max()
+                        
+            f, ax = plt.subplots(nrows=1, ncols=3, figsize=(10,10))
+
+            for i in range(len(ax)):
+                ax[i].set_ylim(top, base)
+                ax[i].invert_yaxis()
+                ax[i].grid()
+                ax[i].locator_params(axis='x', nbins=4)
+            
+            ax[0].plot(logs[x1], logs.DEPTH, color='black')
+            ax[1].plot(logs[x2], logs.DEPTH, color='c')
+            ax[2].plot(logs[x3], logs.DEPTH, color='blue')
+                        
+            ax[0].set_xlabel(f"{x1}  ")
+            if x1 == 'RT':
+                ax[0].set_xscale("log")
+            ax[0].set_xlim(logs[x1].min(), logs[x1].max())
+            ax[0].set_ylabel("Depth(ft)")
+            ax[0].set_title(f"Plot of Depth Against {x1}")
+            ax[1].set_xlabel(f"{x2} ")
+            if x2 == 'RT':
+                ax[1].set_xscale("log")
+            ax[1].set_xlim(logs[x2].min(),logs[x2].max())
+            ax[1].set_title(f"Plot of Depth Against {x2}")
+            ax[2].set_xlabel(f"{x3}")
+            if x3 == 'RT':
+                ax[2].set_xscale("log")
+            ax[2].set_xlim(logs[x3].min(),logs[x3].max())
+            ax[2].set_title(f"Plot of Depth Against {x3}")
+                    
                 
-        if (logs[x1].max() < logs[x2].max()) or (logs[x1].max() < logs[x3].max()):
-            x_max=logs[x1].max()
-        elif (logs[x2].max() < logs[x1].max()) or (logs[x2].max() < logs[x3].max()):
-            x_max=logs[x2].max()
-        else:
-            x_max=logs[x3].max()
-        
-        ax[0].plot(logs[x1], logs.DEPTH, color='black')
-        ax[1].plot(logs[x2], logs.DEPTH, color='c')
-        ax[2].plot(logs[x3], logs.DEPTH, color='blue')
-                    
-        ax[0].set_xlabel(f"{x1}  ")
-        if x1 == 'RT':
-            ax[0].set_xscale("log")
-        ax[0].set_xlim(logs[x1].min(), logs[x1].max())
-        ax[0].set_ylabel("Depth(ft)")
-        ax[0].set_title(f"Plot of Depth Against {x1}")
-        ax[1].set_xlabel(f"{x2} ")
-        if x2 == 'RT':
-            ax[1].set_xscale("log")
-        ax[1].set_xlim(logs[x2].min(),logs[x2].max())
-        ax[1].set_title(f"Plot of Depth Against {x2}")
-        ax[2].set_xlabel(f"{x3}")
-        if x3 == 'RT':
-            ax[2].set_xscale("log")
-        ax[2].set_xlim(logs[x3].min(),logs[x3].max())
-        ax[2].set_title(f"Plot of Depth Against {x3}")
-                    
-                
-    except NameError as err:
-        print(f'Depth column could not be located. {err}')
+        except NameError as err:
+            print(f'Depth column could not be located. {err}')
+
+    else:
+        print(f'scale attribute takes in only True or False')
 
        
         
