@@ -98,6 +98,24 @@ def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
             ax[i].invert_yaxis()
             ax[i].grid()
             ax[i].locator_params(axis='x', nbins=4)
+
+        if (logs[x1].min() < logs[x2].min()) or (logs[x1].min() < logs[x3].min()) or (logs[x1].min() < logs[x4].min()):
+            x_min=logs[x1].min()
+        elif (logs[x2].min() < logs[x1].min()) or (logs[x2].min() < logs[x3].min() or (logs[x2].min() < logs[x4].min())):
+            x_min=logs[x2].min()
+        elif (logs[x3].min() < logs[x1].min()) or (logs[x3].min() < logs[x2].min() or (logs[x3].min() < logs[x4].min())):
+            x_min=logs[x3].min()
+        else:
+            x_min=logs[x4].min()
+                
+        if (logs[x1].max() < logs[x2].max()) or (logs[x1].max() < logs[x3].max()) or (logs[x1].max() < logs[x4].max()):
+            x_max=logs[x1].max()
+        elif (logs[x2].max() < logs[x1].max()) or (logs[x2].max() < logs[x3].max() or (logs[x2].max() < logs[x4].max())):
+            x_max=logs[x2].max()
+        elif (logs[x3].max() < logs[x1].max()) or (logs[x3].max() < logs[x2].max() or (logs[x3].max() < logs[x4].max())):
+            x_max=logs[x3].max()
+        else:
+            x_max=logs[x4].max()
         
         ax[0].plot(logs[x1], logs.DEPTH, color='black')
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
@@ -130,7 +148,7 @@ def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
     except NameError as err:
         print(f'Depth column could not be located. {err}')
 
-def three_plots(logs, x1, x2, x3, top, base, depth=False):
+def three_plots(logs, x1, x2, x3, top, base, depth=False, scale=False):
 
     '''
     Function to automatically plot well logs
@@ -146,6 +164,7 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
     if depth == False:
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
+
     else:
         depth = np.array(logs[depth])
         logs = logs.reset_index(drop=True)
@@ -167,6 +186,20 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
             ax[i].invert_yaxis()
             ax[i].grid()
             ax[i].locator_params(axis='x', nbins=4)
+
+        if (logs[x1].min() < logs[x2].min()) or (logs[x1].min() < logs[x3].min()):
+            x_min=logs[x1].min()
+        elif (logs[x2].min() < logs[x1].min()) or (logs[x2].min() < logs[x3].min()):
+            x_min=logs[x2].min()
+        else:
+            x_min=logs[x3].min()
+                
+        if (logs[x1].max() < logs[x2].max()) or (logs[x1].max() < logs[x3].max()):
+            x_max=logs[x1].max()
+        elif (logs[x2].max() < logs[x1].max()) or (logs[x2].max() < logs[x3].max()):
+            x_max=logs[x2].max()
+        else:
+            x_max=logs[x3].max()
         
         ax[0].plot(logs[x1], logs.DEPTH, color='black')
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
