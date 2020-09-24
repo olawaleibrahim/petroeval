@@ -18,7 +18,7 @@ def four_plot(logs, top, base, depth=False):
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
     else:
-        depth = np.array(logs[depth])
+        depth = np.array(logs[depth])d
         logs = logs.reset_index(drop=True)
         logs['DEPTH'] = depth
 
