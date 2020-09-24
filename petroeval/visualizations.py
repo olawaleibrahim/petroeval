@@ -1,4 +1,4 @@
-from .plots import four_plots, three_plots, two_plots, one_plot
+from .plots import four_plots, four_plot, three_plots, two_plots, one_plot
 
 def summary(data):
     
@@ -54,7 +54,7 @@ def log_plot(logs, top, base, GR=True, NPHI=True, RHOB=True, RT=True):
         #if number of plots is equal to four
         if no_plots == 4:
 
-            four_plots(logs, top, base)
+            four_plot(logs, top, base)
 
         #if number of plots is equal to four
         elif no_plots == 3:
