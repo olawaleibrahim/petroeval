@@ -18,7 +18,7 @@ def four_plot(logs, top, base, depth=False):
         logs['DEPTH'] = logs.index
         logs = logs.reset_index(drop=True)
     else:
-        depth = np.array(logs[depth])d
+        depth = np.array(logs[depth])
         logs = logs.reset_index(drop=True)
         logs['DEPTH'] = depth
 
@@ -36,18 +36,19 @@ def four_plot(logs, top, base, depth=False):
             ax[i].grid()
             ax[i].locator_params(axis='x', nbins=4)
 
-        
+        if logs.NPHI.max() == np.Inf or logs.NPHI.max() == np.nan:
+            nphi_max = 0.9
         ax[0].plot(logs.GR, logs.DEPTH, color='black')
         ax[1].plot(logs.NPHI, logs.DEPTH, color='c')
         ax[2].plot(logs.RHOB, logs.DEPTH, color='blue')
         ax[3].plot(logs.RT, logs.DEPTH, color='red')
                     
         ax[0].set_xlabel("GR (API)")
-        ax[0].set_xlim(logs.GR.min(), logs.GR.max())
+        ax[0].set_xlim(logs.GR.min(), nphi_max)
         ax[0].set_ylabel("Depth(ft)")
         ax[0].set_title(f"Plot of Depth Against GR")
         ax[1].set_xlabel("NPHI (v/v)")
-        ax[1].set_xlim(logs.NPHI.min(),logs.NPHI.max())
+        ax[1].set_xlim(0, logs.NPHI.max())
         ax[1].set_title(f"Plot of Depth Against Neutron Porosity")
         ax[2].set_xlabel("RHOB (g/cm3)")
         ax[2].set_xlim(logs.RHOB.min(),logs.RHOB.max())
