@@ -104,4 +104,3 @@ def log_plot(logs, top, base, GR=True, NPHI=True, RHOB=True, RT=True):
         print(f'NameError: Attritubute not found. Specify attribute. {err}')
 
 
-
