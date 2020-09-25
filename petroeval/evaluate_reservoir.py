@@ -131,11 +131,11 @@ class FormationEvaluation:
             #converting resistivity values of 0 to 0.01
             
             data[self.RT] = np.where(data[self.RT]==0, 0.01, data[self.RT])
-            for i in range(data.shape[0]):
-                if data[self.RT].iloc[i] == 0:
-                    data[self.RT].iloc[i] = 0.1
-                else:
-                    data[self.RT].iloc[i] == data[self.RT].iloc[i]
+            #for i in range(data.shape[0]):
+                #if data[self.RT].iloc[i] == 0:
+                    #data[self.RT].iloc[i] = 0.1
+                #else:
+                    #data[self.RT].iloc[i] == data[self.RT].iloc[i]
         
         
             #to classify each point as shale or sandstone based on the Gamma Ray readings
