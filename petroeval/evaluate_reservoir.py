@@ -140,7 +140,7 @@ class FormationEvaluation:
         
         
             #to classify each point as shale or sandstone based on the Gamma Ray readings
-            df3['litho'] = 0
+            #df3['litho'] = 0
             
             df3.loc[df3.GR < cutoff_test, 'litho'] = 0
             df3.loc[df3.GR > cutoff_test, 'litho'] = 1
@@ -148,39 +148,32 @@ class FormationEvaluation:
             min_GR = data[GR].min()
             max_GR = data[GR].max()
 
-            data['IGR'] = 0
+            #data['IGR'] = 0
             data['IGR'] = (data[GR] - min_GR) / (max_GR - min_GR)
-            data['reading'] = 0
+            #data['reading'] = 0
             data['reading'] = (0.083 * (2 ** (3.7 * data['IGR']) - 1))
-            df3['vsh'] = 0
-            data['vsh'] = 0
+            #df3['vsh'] = 0
+            #data['vsh'] = 0
             data['vsh'] = np.where(data['reading'] < 0, 0, data['reading'])
             data['vsh'] = np.where(data['reading'] > 1, 1, data['reading'])
 
 
             df3['vsh'] = data['vsh']
 
-            df3['ntg'] = 0
+            #df3['ntg'] = 0
             df3['ntg'] = 1 - df3['vsh']
                     
             #Calculating Net Pay using GR and Porosity readings
             
-            net = []
-            df3['Net_Pay'] = 0
+            df3['Net_Pay'] = np.nan
             df3.loc[df3[GR] > cutoff_test, 'Net_Pay'] = 0
             df3.loc[(df3[GR] < cutoff_test) & (df3[NPHI] > 0.25), 'Net_Pay'] = 1
             
-
-            #df3['litho'] = 0.5 * df3['litho']
-            #df3['Net_Pay'] = 0.5 * df3['Net_Pay']
             
-            #Calculating total formation porosity (phid)
-            
-            FL = 1
+            FL = 1   #Formation liquid (assummed to be water, 0.8 for oil)
 
-            df3['phid'] = 0
-            for i in range(df3.shape[0]):
-                df3['phid'].iloc[i] = (2.65 - df3[RHOB].iloc[i]) / (2.65 - FL)
+            #df3['phid'] = 0
+            df3['phid'] = (2.65 - df3[RHOB]) / (2.65 - FL)
                 
             #Setting cutoff conditions for the porosity values
 
@@ -190,39 +183,20 @@ class FormationEvaluation:
                     
             #Calculating water saturation
             
-            sw = []
+            df3['sw'] = np.nan
+            df3['sw'] = (np.sqrt(0.1/(df3[RT].mean() * (df3['phidf'] ** 1.74))))
+            df3['sw'] = np.where(df3['sw'] < 0, 0, df3['sw'])
+            df3['sw'] = np.where(df3['sw'] > 1, 1, df3['sw'])
             
-            for i in range(df3.shape[0]):
-                #i = np.sqrt(0.10 / (df3[RT].iloc[i]) * (phidf[i] ** 1.74))
-                #if i == float('inf'):
-                j = np.sqrt(0.10/(df3[RT].mean() * (df3['phidf'].iloc[i] ** 1.74)))
-                if j < 0:
-                    sw.append(j)
-                elif j > 1:
-                    sw.append(1)
-                else:
-                    sw.append(j)
+            #j = np.sqrt(0.10/(df3[RT].mean() * (df3['phidf'].iloc[i] ** 1.74)))
                     
             #Calculating oil saturation
             
-            oil_sat = []
-            
-            for i in range(0, df3.shape[0]):
-                i = 1 - sw[i]
-                oil_sat.append(i)
-            
-            #df3['vsh'] = vsh
-
-            
-            df3['sw'] = sw
-            df3['oil_sat'] = oil_sat
+            df3['oil_sat'] = 1-df3['sw']
 
             #effective porosity calculation
-            df3['phie'] = 0
-            for i in range(df3.shape[0]):
-                df3['phie'].iloc[i] = df3['phidf'].iloc[i] * df3['ntg'].iloc[i]
-                df3['phie'] = np.where(df3['phie'] < 0, 0, df3['phie'])
-                
+            df3['phie'] = df3['phidf'] * df3['ntg']
+            df3['phie'] = np.where(df3['phie'] < 0, 0, df3['phie'])
             
             #return evaluated parameters
             
