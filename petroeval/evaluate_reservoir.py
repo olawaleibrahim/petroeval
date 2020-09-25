@@ -142,18 +142,8 @@ class FormationEvaluation:
             #to classify each point as shale or sandstone based on the Gamma Ray readings
             df3['litho'] = 0
             
-            #for i in range(data.shape[0]):
-                
-                #if (data[GR].iloc[i] < cutoff_test):
-                    #df3['litho'].iloc[i] = 1
-                #else:
-                    #df3['litho'].iloc[i] = 0
-
-            #new_df.loc[new_df['GR'] < 65, 'LITHO'] = 'ss'
             df3.loc[df3.GR < cutoff_test, 'litho'] = 0
             df3.loc[df3.GR > cutoff_test, 'litho'] = 1
-
-            vsh = []
 
             min_GR = data[GR].min()
             max_GR = data[GR].max()
@@ -166,45 +156,20 @@ class FormationEvaluation:
             data['vsh'] = 0
             data['vsh'] = np.where(data['reading'] < 0, 0, data['reading'])
             data['vsh'] = np.where(data['reading'] > 1, 1, data['reading'])
-            #for i in range(data.shape[0]):
 
-                #IGR = (data[GR].iloc[i] - min_GR) / (max_GR - min_GR)
-                #reading = 0.083 * ((2** (3.7 * IGR)) - 1)
-                #reading = (((3.7 * (data[GR].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
-                
-                #To correct for negative volumes of shale as this is practically not correct
-
-                #if reading < 0:
-                    #vsh.append(0)
-
-                #elif reading > 1:
-                    #vsh.append(1)
-                #else:
-                    #vsh.append(reading)
 
             df3['vsh'] = data['vsh']
 
-            ntg = []
-            for vsh_ in df3['vsh']:
-                amount = 1 - vsh_
-                ntg.append(amount)
-
-            df3['ntg'] = ntg
+            df3['ntg'] = 0
+            df3['ntg'] = 1 - df3['vsh']
                     
             #Calculating Net Pay using GR and Porosity readings
             
             net = []
-
-            for i in range(data.shape[0]):
-                if (data[GR].iloc[i] < cutoff_test) and (data[NPHI].iloc[i] > 0.25):
-                    i = 1
-                    net.append(i)
-                else:
-                    i = 0
-                    net.append(i)
-                    
+            df3['Net_Pay'] = 0
+            df3.loc[df3[GR] > cutoff_test, 'Net_Pay'] = 0
+            df3.loc[(df3[GR] < cutoff_test) & (df3[NPHI] > 0.25), 'Net_Pay'] = 1
             
-            df3['Net_Pay'] = net
 
             #df3['litho'] = 0.5 * df3['litho']
             #df3['Net_Pay'] = 0.5 * df3['Net_Pay']
