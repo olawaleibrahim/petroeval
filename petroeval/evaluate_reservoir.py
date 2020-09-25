@@ -130,7 +130,8 @@ class FormationEvaluation:
         try:
             #converting resistivity values of 0 to 0.01
             
-            data[self.RT] = np.where(data[self.RT]==0, 0.01, data[self.RT])
+            #data[self.RT] = np.where(data[self.RT]==0, 0.01, data[self.RT])
+            data.loc[data[self.RT] == 0, 'RT'] = 0.01
             #for i in range(data.shape[0]):
                 #if data[self.RT].iloc[i] == 0:
                     #data[self.RT].iloc[i] = 0.1
@@ -141,35 +142,47 @@ class FormationEvaluation:
             #to classify each point as shale or sandstone based on the Gamma Ray readings
             df3['litho'] = 0
             
-            for i in range(data.shape[0]):
+            #for i in range(data.shape[0]):
                 
-                if (data[GR].iloc[i] < cutoff_test):
-                    df3['litho'].iloc[i] = 1
-                else:
-                    df3['litho'].iloc[i] = 0
+                #if (data[GR].iloc[i] < cutoff_test):
+                    #df3['litho'].iloc[i] = 1
+                #else:
+                    #df3['litho'].iloc[i] = 0
+
+            #new_df.loc[new_df['GR'] < 65, 'LITHO'] = 'ss'
+            df3.loc[df3.GR < cutoff_test, 'litho'] = 0
+            df3.loc[df3.GR > cutoff_test, 'litho'] = 1
 
             vsh = []
 
             min_GR = data[GR].min()
             max_GR = data[GR].max()
 
-            for i in range(data.shape[0]):
+            data['IGR'] = 0
+            data['IGR'] = (data[GR] - min_GR) / (max_GR - min_GR)
+            data['reading'] = 0
+            data['reading'] = (0.083 * (2 ** (3.7 * data['IGR']) - 1))
+            df3['vsh'] = 0
+            data['vsh'] = 0
+            data['vsh'] = np.where(data['reading'] < 0, 0, data['reading'])
+            data['vsh'] = np.where(data['reading'] > 1, 1, data['reading'])
+            #for i in range(data.shape[0]):
 
-                IGR = (data[GR].iloc[i] - min_GR) / (max_GR - min_GR)
-                reading = 0.083 * ((2** (3.7 * IGR)) - 1)
+                #IGR = (data[GR].iloc[i] - min_GR) / (max_GR - min_GR)
+                #reading = 0.083 * ((2** (3.7 * IGR)) - 1)
                 #reading = (((3.7 * (data[GR].iloc[i] - 25)/(130-25)) ** 2) - 1) * 0.083
                 
                 #To correct for negative volumes of shale as this is practically not correct
 
-                if reading < 0:
-                    vsh.append(0)
+                #if reading < 0:
+                    #vsh.append(0)
 
-                elif reading > 1:
-                    vsh.append(1)
-                else:
-                    vsh.append(reading)
+                #elif reading > 1:
+                    #vsh.append(1)
+                #else:
+                    #vsh.append(reading)
 
-            df3['vsh'] = vsh
+            df3['vsh'] = data['vsh']
 
             ntg = []
             for vsh_ in df3['vsh']:
@@ -233,7 +246,7 @@ class FormationEvaluation:
                 i = 1 - sw[i]
                 oil_sat.append(i)
             
-            df3['vsh'] = vsh
+            #df3['vsh'] = vsh
 
             
             df3['sw'] = sw
