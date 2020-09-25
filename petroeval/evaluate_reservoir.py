@@ -254,7 +254,7 @@ class FormationEvaluation:
             df4['LITHO'] = df3['litho']
             df4['VSH'] = df3['vsh']
             df4['NET_PAY'] = df3['Net_Pay']
-            df4['PHIDF'] = df3['phidf']s
+            df4['PHIDF'] = df3['phidf']
             df4['PHIE'] = df3['phie']
             df4['SW'] = df3['sw']
             df4['OIL_SAT'] = df3['oil_sat']
