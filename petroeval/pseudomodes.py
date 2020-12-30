@@ -3,13 +3,18 @@ Machine learning module for predicting lithology and lithofacies labels
 and other ML functionalities
 """
 
-from plots import four_plots
-import joblib
-from sklearn.preprocessing import StandardScaler
-import sklearn.model_selection as ms
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+import sklearn.model_selection as ms
+import matplotlib.pyplot as plt
 import xgboost as XGBRegressor
+from plots import four_plots
+import pandas as pd
+import numpy as np
+import joblib
+
 
 class PredictLitho():
 
@@ -17,31 +22,56 @@ class PredictLitho():
     Class for predicting lithology
     '''
 
-    def __init__(self, df, depth_col):
+    def __init__(self, df, depth_col, plot=True):
 
         self.df = df
         self.depth_col = depth_col
+        self.plot = plot
 
     def __call__(self, plot=True):
-        self.train(plot)
+        return self.train(plot)
 
     
-    def _preprocess(self, df, target):
+    def _preprocess(self, df, target, start, end):
 
         self.df = df
         self.target = target
+        self.start = start
+        self.end = self.end
 
         df.fillna(-9999, inplace=True)
-        target = df[target]
-        new_df = (df.drop(target, axis=1)).copy()
+        #target_values = df[target]
+        print(df.head())
+        new_df = (df.drop(target, axis=1))
+
+        columns = list(new_df.columns)
+
+        # divide dataframe into train part and part needed for prediction
+
+        '''
+        The idea is to use the depth column and the range passed by the parameters.
+        The range specified represent the range needed for prediction. Every other part 
+        is used as the training data set
+        '''
+
+        top_df = new_df.iloc[:new_df[new_df[self.depth_col] == start].index[0]]
+        bottom_df = new_df.iloc[new_df[new_df[self.depth_col] == end].index[0]: new_df.shape[0] + 1]
+
+        top_target = df.iloc[0:df[df[self.depth_col] == start].index[0]]
+        bottom_target = df.iloc[df[df[self.depth_col] == end].index[0]: df.shape[0] + 1]
+
+        train_features = pd.concat((top_df, bottom_df), axis=0)
+        new_df = pd.concat((top_target, bottom_target), axis=0)
+
+        train_target = new_df[target]
+
+        train_features = StandardScaler().fit_transform(train_features)
+        train_features = pd.DataFrame(train_features, columns=columns)
+
+        return train_features, train_target
 
 
-        scaled_df = StandardScaler().fit_transform(new_df)
-
-        return scaled_df, target
-
-
-    def train(self, target, start, end, model='RF', CV=3):
+    def train(self, target, start, end, plot, model='RF', CV=3):
 
         self.model = model
         self.target = target
@@ -52,43 +82,37 @@ class PredictLitho():
 
         try:
             if CV < 3:
-                print(f'Number of cross validation folds should be greaterb than 2; {CV} specified')
-            raise ('Invalid Entry Error')
-
+                raise ValueError(f'Number of cross validation folds should be greaterb than 2; {CV} specified')
+            
         except ValueError as err:
             print(err)
 
-        train_features, train_target = self._preprocess(self.df, self.target)
+        train_features, train_target = self._preprocess(self.df, self.target, start, end)
 
         # divide dataframe into train part and part needed for prediction
 
-        top_df = train_features.iloc[0:train_features[train_features.depth == start].index[0]]
-        bottom_df = train_features.iloc[train_features[train_features.depth == end].index[0]: train_features.shape[0] + 1]
-
-        train_features = pd.concat((top_df, bottom_df), axis=0)
-
-
-
-        #test_features = df.
-        #train_features = df.iloc[0:df.depth.iloc[start]]
-        #train_target = 
-
-        features = df.drop([target, self.depth_col], axis=1)
-        feature_columns = list(features.columns)
+        '''
+        The idea is to use the depth column and the range passed by the parameters.
+        The range specified represent the range needed for prediction. Every other part 
+        is used as the training data set
+        '''
 
         if model == 'RF':
 
-            model = RandomForestRegressor(n_estimators=100, max_depth=6, random_state=42)
+            model = RandomForestRegressor(n_estimators=100, max_depth=6, random_state=42, verbose=2)
             model.fit(train_features, train_target)
 
         elif model == 'XGB':
             model = xgb.XGBRegressor(n_estimators=3000, max_depth=8, reg_lambda=500,
             random_state=20)
 
-        X_train, y_train, X_test, y_test = ms.train_test_split(train_features, train_target,
+        X_train, X_test, y_train, y_test = ms.train_test_split(train_features, train_target,
                                                                 test_size=0.2, random_state=20)
 
-        
+        print(f'(X_train, y_train): {X_train.shape, y_train.shape}, (X_test, y_test): {X_test.shape, y_test.shape}')
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        print(f'The test score is : {mean_squared_error(y_pred, y_test) ** 0.5}')
 
         if plot:
             self.plot_feat_imp(model)
@@ -103,7 +127,7 @@ class PredictLitho():
         self.start = start
         self.end = end
 
-        trained_model, test_features = self.train(model, target, start, end)
+        trained_model, test_features = self.train(target, start, end, self.plot)
         prediction = trained_model.predict(test_features)
 
         return prediction
