@@ -3,6 +3,9 @@ Machine learning module for predicting lithology and lithofacies labels
 and other ML functionalities
 """
 
+from plots import four_plots
+import joblib
+from sklearn.preprocessing import StandardScaler
 import sklearn.model_selection as ms
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.ensemble import RandomForestRegressor
@@ -22,7 +25,23 @@ class PredictLitho():
     def __call__(self, plot=True):
         self.train(plot)
 
-    def train(target, start, end, model='RF', CV=3):
+    
+    def _preprocess(self, df, target):
+
+        self.df = df
+        self.target = target
+
+        df.fillna(-9999, inplace=True)
+        target = df[target]
+        new_df = (df.drop(target, axis=1)).copy()
+
+
+        scaled_df = StandardScaler().fit_transform(new_df)
+
+        return scaled_df, target
+
+
+    def train(self, target, start, end, model='RF', CV=3):
 
         self.model = model
         self.target = target
@@ -38,6 +57,17 @@ class PredictLitho():
 
         except ValueError as err:
             print(err)
+
+        train_features, train_target = self._preprocess(self.df, self.target)
+
+        # divide dataframe into train part and part needed for prediction
+
+        top_df = train_features.iloc[0:train_features[train_features.depth == start].index[0]]
+        bottom_df = train_features.iloc[train_features[train_features.depth == end].index[0]: train_features.shape[0] + 1]
+
+        train_features = pd.concat((top_df, bottom_df), axis=0)
+
+
 
         #test_features = df.
         #train_features = df.iloc[0:df.depth.iloc[start]]
@@ -74,7 +104,7 @@ class PredictLitho():
         self.end = end
 
         trained_model, test_features = self.train(model, target, start, end)
-        prediction = train_model.predict(test_features)
+        prediction = trained_model.predict(test_features)
 
         return prediction
     
@@ -98,13 +128,32 @@ class PredictLabels():
         self.depth_col = depth_col
 
 
-    def train(self):
+    def train(self, pretrained=True):
+
+        self.pretrained = pretrained
+
+        if pretrained:
+
+            model = joblib.load('data/lithofacies_model')
+
+        return model, test_features
 
 
-    def plot_feat_imp(self):
+    #def plot_feat_imp(self):
 
-        
+
 
     
-    def predict(self):
+    def predict(self, pretrained, plot_pred=True):
 
+        self.pretrained = pretrained
+
+        model, test_features = self.train(pretrained)
+        predictions = model.predict(test_features)
+
+        if plot_pred:
+            df = self.df.copy()
+            df['Lithofacies'] = predictions
+            four_plots(self.df, 'GR', 'NPHI', 'RHOB', 'Lithofacies')
+
+        return predictions
