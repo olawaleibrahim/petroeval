@@ -4,9 +4,9 @@ and other ML functionalities
 """
 
 from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error
 import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import xgboost as XGBRegressor
@@ -37,14 +37,24 @@ class PredictLitho():
         self.df = df
         self.target = target
         self.start = start
-        self.end = self.end
+        self.end = end
 
         df.fillna(-9999, inplace=True)
-        #target_values = df[target]
         print(df.head())
-        new_df = (df.drop(target, axis=1))
+        #new_df = (df.drop(target, axis=1))
+        new_df = df.copy()
 
-        columns = list(new_df.columns)
+        columns_ = list(new_df.columns)
+
+        # dropping columns with categorical contents for easier processing
+
+        for column in columns_:
+            if new_df[column].dtype == 'object':
+                new_df.drop(column, axis=1, inplace=True)
+
+        new_df['depth'] = range(0, new_df.shape[0])
+        #columns = new_df.columns
+
 
         # divide dataframe into train part and part needed for prediction
 
@@ -54,21 +64,37 @@ class PredictLitho():
         is used as the training data set
         '''
 
-        top_df = new_df.iloc[:new_df[new_df[self.depth_col] == start].index[0]]
-        bottom_df = new_df.iloc[new_df[new_df[self.depth_col] == end].index[0]: new_df.shape[0] + 1]
+        print(f'The shape is {new_df.shape}')
+        top_df = new_df.iloc[:new_df[new_df['depth'] == start].index[0]]
+        bottom_df = new_df.iloc[new_df[new_df['depth'] == end].index[0]: ]
+        test_features = new_df.iloc[new_df[new_df['depth'] == start].index[0] : new_df[new_df['depth'] == end].index[0]]
 
-        top_target = df.iloc[0:df[df[self.depth_col] == start].index[0]]
-        bottom_target = df.iloc[df[df[self.depth_col] == end].index[0]: df.shape[0] + 1]
+        top_target = new_df.iloc[:new_df[new_df['depth'] == start].index[0]]
+        bottom_target = new_df.iloc[new_df[new_df['depth'] == end].index[0]: ]
 
         train_features = pd.concat((top_df, bottom_df), axis=0)
+        train_features.drop(target, axis=1, inplace=True)
+        test_features.drop(target, axis=1, inplace=True)
+
+        columns = list(train_features.columns)
+
         new_df = pd.concat((top_target, bottom_target), axis=0)
 
         train_target = new_df[target]
 
-        train_features = StandardScaler().fit_transform(train_features)
-        train_features = pd.DataFrame(train_features, columns=columns)
+        scaler = StandardScaler().fit(train_features)
+        train_features = scaler.transform(train_features)
+        test_features = scaler.transform(test_features)
 
-        return train_features, train_target
+        train_features = pd.DataFrame(train_features, columns=columns)
+        test_features = pd.DataFrame(test_features, columns=columns)
+        
+        # dropping added depth column which was used to aid preprocessing
+
+        train_features.drop('depth', axis=1, inplace=True)
+        test_features.drop('depth', axis=1, inplace=True)
+
+        return train_features, train_target, test_features
 
 
     def train(self, target, start, end, plot, model='RF', CV=3):
@@ -87,8 +113,10 @@ class PredictLitho():
         except ValueError as err:
             print(err)
 
-        train_features, train_target = self._preprocess(self.df, self.target, start, end)
+        train_features, train_target, test_features = self._preprocess(self.df, self.target, start, end)
 
+        print(f'Train features: {train_features.head(3)}')
+        print(f'Test features: {test_features.head(3)}')
         # divide dataframe into train part and part needed for prediction
 
         '''
@@ -99,7 +127,7 @@ class PredictLitho():
 
         if model == 'RF':
 
-            model = RandomForestRegressor(n_estimators=100, max_depth=6, random_state=42, verbose=2)
+            model = RandomForestRegressor(n_estimators=5, max_depth=6, random_state=42, verbose=2)
             model.fit(train_features, train_target)
 
         elif model == 'XGB':
@@ -112,7 +140,8 @@ class PredictLitho():
         print(f'(X_train, y_train): {X_train.shape, y_train.shape}, (X_test, y_test): {X_test.shape, y_test.shape}')
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
-        print(f'The test score is : {mean_squared_error(y_pred, y_test) ** 0.5}')
+        print(f'The test RMSE is : {mean_squared_error(y_test, y_pred) ** 0.5}')
+        print(f'The test R2 score is : {r2_score(y_test, y_pred)}')
 
         if plot:
             self.plot_feat_imp(model)
@@ -126,8 +155,10 @@ class PredictLitho():
         self.target = target
         self.start = start
         self.end = end
+        self.CV = CV
 
-        trained_model, test_features = self.train(target, start, end, self.plot)
+
+        trained_model, test_features = self.train(target, start, end, self.plot, CV=CV)
         prediction = trained_model.predict(test_features)
 
         return prediction

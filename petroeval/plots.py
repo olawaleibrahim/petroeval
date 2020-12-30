@@ -1,6 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+def process(df):
+
+    '''
+    Function to process log and replace missing or infinity values with zero
+    for easier plotting
+    '''
+
+    cols = list(df.columns)
+    for _ in cols:
+
+        df[_] = np.where(df[_] == np.inf, 0, df[_])
+        df[_] = np.where(df[_] == np.nan, 0, df[_])
+        df[_] = np.where(df[_] == np.NaN, 0, df[_])
+        df[_] = np.where(df[_] == -np.inf, 0, df[_])
+        
+    return df
 
 
 def four_plot(logs, top, base, depth=False):
@@ -13,6 +29,8 @@ def four_plot(logs, top, base, depth=False):
           depth: Set to false or leave as default to use dataframe index
                  Set to column title if column depth should be used
     '''
+
+    logs = process(logs)
 
     if depth == False:
         logs['DEPTH'] = logs.index
@@ -73,6 +91,8 @@ def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
                  Set to column title if column depth should be used
 
     '''
+
+    logs = process(logs)
 
     #Setting the value of the y axis. Using index or property specified
     if depth == False:
@@ -143,6 +163,8 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
 
     '''
 
+    logs = process(loogs)
+
     #Setting the value of the y axis. Using index or property specified
     if depth == False:
         logs['DEPTH'] = logs.index
@@ -204,18 +226,10 @@ def two_plots(logs, x1, x2, top, base, depth=False):
           logs: Dataframe object of well logs
           depth: Set to false or leave as default to use dataframe index
                  Set to column title if column depth should be used
-    
-
-    #Converting the values of the resistivity logs to log scale
-    if x1 == 'RT':
-        logs[x1] = np.log(logs[x1])
-        #logs[x1] = logs[x1].replace({np.Inf:0, np.nan:0}, inplace=False)
-
-    if x2 == 'RT':
-        logs[x2] = np.log(logs[x2])
-        #logs[x2] = logs[x2].replace({np.Inf:0, np.nan:0}, inplace=False)
 
     '''
+
+    logs = process(logs)
 
     #Setting the value of the y axis. Using index or property specified
     if depth == False:
@@ -226,7 +240,7 @@ def two_plots(logs, x1, x2, top, base, depth=False):
         logs = logs.reset_index(drop=True)
         logs['DEPTH'] = depth
 
-    logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
+    #logs = logs.loc[(logs.DEPTH >= float(top)) & (logs.DEPTH <= float(base))]
             
     try:
 
@@ -242,10 +256,12 @@ def two_plots(logs, x1, x2, top, base, depth=False):
         
         ax[0].plot(logs[x1], logs.DEPTH, color='black')
         ax[1].plot(logs[x2], logs.DEPTH, color='c')
+        
                         
         ax[0].set_xlabel(f"{x1}  ")
         if x1 == 'RT':
             ax[0].set_xscale("log")
+        print(logs[x1].min(), logs[x1].max())
         ax[0].set_xlim(logs[x1].min(), logs[x1].max())
         ax[0].set_ylabel("Depth(ft)")
         ax[0].set_title(f"Plot of Depth Against {x1}")
@@ -281,6 +297,8 @@ def two_plot(logs, x1, x2, top, base, depth=False, scale=False):
         #logs[x2] = logs[x2].replace({np.Inf:0, np.nan:0}, inplace=False)
 
     '''
+
+    logs = process(logs)
 
     #Setting the value of the y axis. Using index or property specified
     if depth == False:
@@ -382,14 +400,10 @@ def one_plot(logs, x1, top, base, depth=False):
           logs: Dataframe object of well logs
           depth: Set to false or leave as default to use dataframe index
                  Set to column title if column depth should be used
-    
-
-    #Converting the values of the resistivity logs to log scale
-    if x1 == 'RT':
-        logs[x1] = np.log(logs[x1])
-        #logs[x1] = logs[x1].replace({np.Inf:0, np.nan:0}, inplace=False)
 
     '''
+
+    logs = process(logs)
 
     #Setting the value of the y axis. Using index or property specified   
     if depth == False:
