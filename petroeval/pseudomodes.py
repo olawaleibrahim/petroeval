@@ -157,7 +157,6 @@ class PredictLitho():
         self.end = end
         self.CV = CV
 
-
         trained_model, test_features = self.train(target, start, end, self.plot, CV=CV)
         prediction = trained_model.predict(test_features)
 
@@ -192,7 +191,13 @@ class PredictLabels():
         self.df = df
         self.depth_col = depth_col
 
-    def _preprocess(self)
+
+    def __call__(self, plot=True):
+        return self.train(plot)
+
+
+    def _preprocess(self):
+        pass
 
     def train(self, pretrained=True):
 
@@ -205,21 +210,38 @@ class PredictLabels():
         return model, test_features
 
 
-    #def plot_feat_imp(self):
+    def plot_feat_imp(self, model, columns):
 
+        self.columns = columns
+        self.model = model
 
+        x = len(columns)
+        x = np.arange(0, x)
+        feat_imp = pd.Series(model.feature_importances_).sort_values(ascending=False)
+        fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+        plt.figure(figsize=(12,8))
+        ax.bar(x, feat_imp)
+        ax.set_xticks(x)
+        ax.set_xticklabels(columns, rotation='vertical', fontsize=18)
+        ax.set_ylabel('Feature Importance Score')    
 
     
-    def predict(self, pretrained, plot_pred=True):
+    def predict(self, target, start, end, model='RF', CV=3):
 
-        self.pretrained = pretrained
+        self.model = model
+        self.target = target
+        self.start = start
+        self.end = end
+        self.CV = CV
 
-        model, test_features = self.train(pretrained)
-        predictions = model.predict(test_features)
+        trained_model, test_features = self.train(target, start, end, self.plot, CV=CV)
+        prediction = trained_model.predict(test_features)
 
-        if plot_pred:
-            df = self.df.copy()
-            df['Lithofacies'] = predictions
-            four_plots(self.df, 'GR', 'NPHI', 'RHOB', 'Lithofacies')
+        return prediction
 
-        return predictions
+
+class DataHandlers():
+
+    def __init__(self, df):
+
+        self.df = df
