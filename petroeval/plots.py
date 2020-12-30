@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
 
+warnings.filterwarnings('ignore')
 def process(df):
 
     '''
@@ -11,10 +13,12 @@ def process(df):
     cols = list(df.columns)
     for _ in cols:
 
-        df[_] = np.where(df[_] == np.inf, 0, df[_])
-        df[_] = np.where(df[_] == np.nan, 0, df[_])
-        df[_] = np.where(df[_] == np.NaN, 0, df[_])
-        df[_] = np.where(df[_] == -np.inf, 0, df[_])
+        #df[_] = np.where(df[_] == np.inf, 0, df[_])
+        df.loc[df[_] == np.inf] = 0
+        #df[_] = np.where(df[_] == np.nan, 0, df[_])
+        df.loc[df[_] == np.NaN] = 0
+        #df[_] = np.where(df[_] == -np.inf, 0, df[_])
+        df.loc[df[_] == -np.inf] = 0
         
     return df
 
