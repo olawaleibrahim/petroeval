@@ -145,7 +145,7 @@ def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
             ax[3].set_xscale("log")
         ax[3].set_xlim(logs[x3].min(),logs[x3].max())
         ax[3].set_title(f"Plot of Depth Against {x4}")
-        ax[3].set_xlabel(f"{x3}")
+        ax[3].set_xlabel(f"{x4}")
                     
                 
     except NameError as err:
@@ -261,7 +261,6 @@ def two_plots(logs, x1, x2, top, base, depth=False):
         ax[0].set_xlabel(f"{x1}  ")
         if x1 == 'RT':
             ax[0].set_xscale("log")
-        print(logs[x1].min(), logs[x1].max())
         ax[0].set_xlim(logs[x1].min(), logs[x1].max())
         ax[0].set_ylabel("Depth(ft)")
         ax[0].set_title(f"Plot of Depth Against {x1}")

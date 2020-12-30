@@ -40,7 +40,7 @@ class PredictLitho():
         self.end = end
 
         df.fillna(-9999, inplace=True)
-        print(df.head())
+        
         #new_df = (df.drop(target, axis=1))
         new_df = df.copy()
 
@@ -64,7 +64,6 @@ class PredictLitho():
         is used as the training data set
         '''
 
-        print(f'The shape is {new_df.shape}')
         top_df = new_df.iloc[:new_df[new_df['depth'] == start].index[0]]
         bottom_df = new_df.iloc[new_df[new_df['depth'] == end].index[0]: ]
         test_features = new_df.iloc[new_df[new_df['depth'] == start].index[0] : new_df[new_df['depth'] == end].index[0]]
@@ -115,8 +114,9 @@ class PredictLitho():
 
         train_features, train_target, test_features = self._preprocess(self.df, self.target, start, end)
 
-        print(f'Train features: {train_features.head(3)}')
-        print(f'Test features: {test_features.head(3)}')
+        #print(f'Train features: {train_features.head(3)}')
+        #print(f'Test features: {test_features.head(3)}')
+
         # divide dataframe into train part and part needed for prediction
 
         '''
@@ -127,7 +127,7 @@ class PredictLitho():
 
         if model == 'RF':
 
-            model = RandomForestRegressor(n_estimators=5, max_depth=6, random_state=42, verbose=2)
+            model = RandomForestRegressor(n_estimators=100, max_depth=6, random_state=42, verbose=2)
             model.fit(train_features, train_target)
 
         elif model == 'XGB':
@@ -144,7 +144,7 @@ class PredictLitho():
         print(f'The test R2 score is : {r2_score(y_test, y_pred)}')
 
         if plot:
-            self.plot_feat_imp(model)
+            self.plot_feat_imp(model, list(train_features.columns))
 
         return model, test_features
 
@@ -163,12 +163,22 @@ class PredictLitho():
 
         return prediction
     
-    def plot_feat_imp(self, model):
+    def plot_feat_imp(self, model, columns):
 
+        self.columns = columns
+        self.model = model
+
+        x = len(columns)
+        x = np.arange(0, x)
         feat_imp = pd.Series(model.feature_importances_).sort_values(ascending=False)
+        fig, ax = plt.subplots(1, 1, figsize=(12, 8))
         plt.figure(figsize=(12,8))
-        feat_imp.plot(kind='bar', title='Feature Importances')
-        plt.ylabel('Feature Importance Score')    
+        ax.bar(x, feat_imp)
+        ax.set_xticks(x)
+        ax.set_xticklabels(columns, rotation='vertical', fontsize=18)
+        ax.set_ylabel('Feature Importance Score')
+
+        plt.show()
 
     
 class PredictLabels():
