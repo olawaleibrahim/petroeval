@@ -40,7 +40,7 @@ class PredictLitho():
         self.end = end
 
         df.fillna(-9999, inplace=True)
-        
+
         #new_df = (df.drop(target, axis=1))
         new_df = df.copy()
 
@@ -192,6 +192,7 @@ class PredictLabels():
         self.df = df
         self.depth_col = depth_col
 
+    def _preprocess(self)
 
     def train(self, pretrained=True):
 
