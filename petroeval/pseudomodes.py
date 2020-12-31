@@ -7,9 +7,11 @@ from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
+import preprocessing
 import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import xgboost as XGBRegressor
+from utils import drop_columns
 from plots import four_plots
 import pandas as pd
 import numpy as np
@@ -196,8 +198,42 @@ class PredictLabels():
         return self.train(plot)
 
 
-    def _preprocess(self):
-        pass
+    def _preprocess(self, df, target):
+        
+        self.df = df
+        self.target = target
+
+        df.fillna(-9999, inplace=True)
+
+        lithology_numbers = {30000: 0,
+                        65030: 1,
+                        65000: 2,
+                        80000: 3,
+                        74000: 4,
+                        70000: 5,
+                        70032: 6,
+                        88000: 7,
+                        86000: 8,
+                        99000: 9,
+                        90000: 10,
+                        93000: 11,
+                        -9999: 'Unknown'}
+
+        lithology = df[target]
+        lithology = lithology.map(lithology_numbers)
+
+        df_wells = df.WELLS.values
+        df_depth = df.DEPTH.values
+
+        cols = ['FORCE_2020_LITHOFACIES_CONFIDENCE', 'SGR', 'DTS', 'RXO', 'ROPA'] #columns to be dropped
+        df = drop_columns(df, *cols)
+
+        df['GROUP_encoded'] = df['GROUP'].astype('category')
+        df['GROUP_encoded'] = df['GROUP_encoded'].cat.codes 
+        df['FORMATION_encoded'] = df['FORMATION'].astype('category')
+        df['FORMATION_encoded'] = df['FORMATION_encoded'].cat.codes
+        df['WELL_encoded'] = df['WELL'].astype('category')
+        df['WELL_encoded'] = df['WELL_encoded'].cat.codes
 
     def train(self, pretrained=True):
 
@@ -242,6 +278,31 @@ class PredictLabels():
 
 class DataHandlers():
 
+    '''
+    Will handle the preprocessing of the dataframe for categorical and numerical variables
+    as well as handling different mnemonics issues
+    '''
+
     def __init__(self, df):
 
         self.df = df
+
+    
+    def __call__(self):
+        return self.
+
+    def set_mnemonics(self, GR, RHOB, RT, NPHI, depth=False):
+
+        self.GR = GR
+        self.RHOB = RHOB
+        self.RT = RT
+        self.NPHI = NPHI
+        self.depth = depth
+        df = self.df
+
+        if depth == False:
+            df['depth'] = df.index
+
+        df = preprocessing.set_mnemonics(self.df, GR, NPHI, RHOB, RT)
+
+        return df

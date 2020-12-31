@@ -1,26 +1,9 @@
 import matplotlib.pyplot as plt
+from utils import process
 import numpy as np
 import warnings
 
 warnings.filterwarnings('ignore')
-def process(df):
-
-    '''
-    Function to process log and replace missing or infinity values with zero
-    for easier plotting
-    '''
-
-    cols = list(df.columns)
-    for _ in cols:
-
-        #df[_] = np.where(df[_] == np.inf, 0, df[_])
-        df.loc[df[_] == np.inf] = 0
-        #df[_] = np.where(df[_] == np.nan, 0, df[_])
-        df.loc[df[_] == np.NaN] = 0
-        #df[_] = np.where(df[_] == -np.inf, 0, df[_])
-        df.loc[df[_] == -np.inf] = 0
-        
-    return df
 
 
 def four_plot(logs, top, base, depth=False):
