@@ -3,7 +3,7 @@ Machine learning module for predicting lithology and lithofacies labels
 and other ML functionalities
 """
 
-from utils import drop_columns, label_encode, one_hot_encode, check_cardinality
+from utils import drop_columns, label_encode, one_hot_encode, augment_features, check_cardinality
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
@@ -13,6 +13,7 @@ import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import xgboost as XGBRegressor
 from plots import four_plots
+import xgboost as xgb
 import pandas as pd
 import numpy as np
 import joblib
@@ -188,10 +189,11 @@ class PredictLabels():
     Class for predicting lithofacies
     '''
 
-    def __init__(self, df, depth_col):
+    def __init__(self, df, depth_col, plot=True):
 
         self.df = df
         self.depth_col = depth_col
+        self.plot = plot
 
 
     def __call__(self, plot=True):
@@ -217,7 +219,7 @@ class PredictLabels():
                         99000: 9,
                         90000: 10,
                         93000: 11,
-                        -9999: 'Unknown'}
+                        -9999: 12}
 
         lithology = df[target]
         lithology = lithology.map(lithology_numbers)
@@ -225,26 +227,48 @@ class PredictLabels():
         df_wells = df.WELLS.values
         df_depth = df.DEPTH.values
 
-        cols = ['FORCE_2020_LITHOFACIES_CONFIDENCE', 'SGR', 'DTS', 'RXO', 'ROPA'] #columns to be dropped
+        cols = ['FORCE_2020_LITHOFACIES_CONFIDENCE', 'SGR', 'DTS', 'RXO', 
+                'ROPA', 'FORCE_2020_LITHOFACIES_LITHOLOGY'] #columns to be dropped
         df = drop_columns(df, *cols)
 
-        df['GROUP_encoded'] = df['GROUP'].astype('category')
-        df['GROUP_encoded'] = df['GROUP_encoded'].cat.codes 
-        df['FORMATION_encoded'] = df['FORMATION'].astype('category')
-        df['FORMATION_encoded'] = df['FORMATION_encoded'].cat.codes
-        df['WELL_encoded'] = df['WELL'].astype('category')
-        df['WELL_encoded'] = df['WELL_encoded'].cat.codes
+        df = DataHandlers(df)
+        df = df()
 
-    def train(self, pretrained=True):
+        print(f'Shape of dataframe before augmentation: {df.shape}')
+        df, padded_rows = augment_features(df, df_wells, df_depth)
+        print(f'Shape of dataframe after augmentation: {df.shape}')
 
+        return df, lithology
+
+
+    def train(self, start, end, pretrained=True):
+
+        self.start = start
+        self.end = end
         self.pretrained = pretrained
 
         if pretrained:
+            model = xgb.Booster({'nthred': 4})
+            model.load_model('data/lithofacies_model.model')
+            #model = joblib.load('data/lithofacies_model.json')
 
-            model = joblib.load('data/lithofacies_model')
+        test_features, lithology = self._preprocess(self.df, self.target)
 
-        return model, test_features
+        return model, test_features, lithology   
 
+    
+    def predict(self, target, start, end, model='RF', CV=3):
+
+        self.model = model
+        self.target = target
+        self.start = start
+        self.end = end
+        self.CV = CV
+
+        trained_model, test_features, lithology = self.train(target, start, end)
+        prediction = trained_model.predict(test_features)
+
+        return prediction
 
     def plot_feat_imp(self, model, columns):
 
@@ -259,21 +283,7 @@ class PredictLabels():
         ax.bar(x, feat_imp)
         ax.set_xticks(x)
         ax.set_xticklabels(columns, rotation='vertical', fontsize=18)
-        ax.set_ylabel('Feature Importance Score')    
-
-    
-    def predict(self, target, start, end, model='RF', CV=3):
-
-        self.model = model
-        self.target = target
-        self.start = start
-        self.end = end
-        self.CV = CV
-
-        trained_model, test_features = self.train(target, start, end, self.plot, CV=CV)
-        prediction = trained_model.predict(test_features)
-
-        return prediction
+        ax.set_ylabel('Feature Importance Score') 
 
 
 class DataHandlers():
@@ -291,7 +301,7 @@ class DataHandlers():
     def __call__(self):
 
         df = self.encode_categorical()
-        
+
         return df
 
 
@@ -311,7 +321,7 @@ class DataHandlers():
 
         for column in cat_df.columns:
 
-            if check_cardinality(cat_df, column) == 'Unique':
+            if check_cardinality(cat_df, column) == 'Unique' or check_cardinality(cat_df, column) == 'Distinct':
                 cat_df.drop(column, axis=1, inplace=True)
 
             elif check_cardinality(cat_df, column) == 'High':
@@ -323,13 +333,14 @@ class DataHandlers():
         return cat_df
 
 
-    def set_mnemonics(self, GR, RHOB, RT, NPHI, depth=False):
+    def set_mnemonics(self, GR, RHOB, RT, NPHI, target=None, depth=False):
 
         self.GR = GR
         self.RHOB = RHOB
         self.RT = RT
         self.NPHI = NPHI
         self.depth = depth
+        self.target = target
         df = self.df
 
         if depth == False:
