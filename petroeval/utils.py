@@ -45,10 +45,16 @@ def check_cardinality(df, column):
     value_count = df[column].value_counts()
     unique_count = len(value_count)
     
-    if (unique_count/no_rows) >= 90 and unique_count > 10:
-        value = True
-    else:
-        value = False
+    value = None
+    
+    if (unique_count/no_rows) >= 0.9 and unique_count > 10:
+        value = 'Unique'
+
+    elif (unique_count/no_rows) < 0.9 and unique_count > 10:
+        value = 'High'
+
+    elif unique_count < 5:
+        value = 'Low'
 
     return value
 

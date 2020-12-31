@@ -3,10 +3,10 @@ Machine learning module for predicting lithology and lithofacies labels
 and other ML functionalities
 """
 
+from utils import drop_columns, label_encode, one_hot_encode, check_cardinality
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
-from utils import drop_columns, check_cardinality
 from sklearn.preprocessing import StandardScaler
 import preprocessing
 import sklearn.model_selection as ms
@@ -289,7 +289,10 @@ class DataHandlers():
 
     
     def __call__(self):
-        return self.
+
+        df = self.encode_categorical()
+        
+        return df
 
 
     def encode_categorical(self):
@@ -306,6 +309,16 @@ class DataHandlers():
 
         # check cardinality of categorical variables then encode based on cardinality
 
+        for column in cat_df.columns:
+
+            if check_cardinality(cat_df, column) == 'Unique':
+                cat_df.drop(column, axis=1, inplace=True)
+
+            elif check_cardinality(cat_df, column) == 'High':
+                cat_df = label_encode(cat_df, column)
+
+            elif check_cardinality(cat_df, column) == 'Low':
+                cat_df = one_hot_encode(cat_df, column)
 
         return cat_df
 
