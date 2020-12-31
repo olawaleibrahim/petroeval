@@ -6,12 +6,12 @@ and other ML functionalities
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
+from utils import drop_columns, check_cardinality
 from sklearn.preprocessing import StandardScaler
 import preprocessing
 import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import xgboost as XGBRegressor
-from utils import drop_columns
 from plots import four_plots
 import pandas as pd
 import numpy as np
@@ -292,7 +292,23 @@ class DataHandlers():
         return self.
 
 
-    def 
+    def encode_categorical(self):
+
+        df = self.df
+
+        columns = list(df.columns)
+
+        cat_df = pd.DataFrame()
+
+        for column in columns:
+            if df[column].dtype == object:
+                cat_df[column] = df[column]
+
+        # check cardinality of categorical variables then encode based on cardinality
+
+
+        return cat_df
+
 
     def set_mnemonics(self, GR, RHOB, RT, NPHI, depth=False):
 

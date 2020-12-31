@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 def drop_columns(data, *args):
 
     '''
@@ -34,4 +37,30 @@ def process(df):
         #df[_] = np.where(df[_] == -np.inf, 0, df[_])
         df.loc[df[_] == -np.inf] = 0
         
+    return df
+
+def check_cardinality(df, column):
+
+    no_rows = df.shape[0]
+    value_count = df[column].value_counts()
+    unique_count = len(value_count)
+    
+    if (unique_count/no_rows) >= 90 and unique_count > 10:
+        value = True
+    else:
+        value = False
+
+    return value
+
+def label_encode(df, column):
+
+    df[column] = df[column].astype('category')
+    df[column] = df[column].cat.codes
+
+    return df
+
+def one_hot_encode(df, column):
+
+    df = pd.get_dummies(df, prefix=column, columns=[column])
+
     return df
