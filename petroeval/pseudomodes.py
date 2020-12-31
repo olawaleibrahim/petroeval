@@ -223,9 +223,9 @@ class PredictLabels():
 
         lithology = df[target]
         lithology = lithology.map(lithology_numbers)
-
-        df_wells = df.WELLS.values
-        df_depth = df.DEPTH.values
+        
+        df_wells = df.WELL.values
+        df_depth = df.DEPTH_MD.values
 
         cols = ['FORCE_2020_LITHOFACIES_CONFIDENCE', 'SGR', 'DTS', 'RXO', 
                 'ROPA', 'FORCE_2020_LITHOFACIES_LITHOLOGY'] #columns to be dropped
@@ -235,7 +235,7 @@ class PredictLabels():
         df = df()
 
         print(f'Shape of dataframe before augmentation: {df.shape}')
-        df, padded_rows = augment_features(df, df_wells, df_depth)
+        df, padded_rows = augment_features(df.values, df_wells, df_depth)
         print(f'Shape of dataframe after augmentation: {df.shape}')
 
         return df, lithology
@@ -266,7 +266,10 @@ class PredictLabels():
         self.CV = CV
 
         trained_model, test_features, lithology = self.train(target, start, end)
+        test_features = xgb.DMatrix(pd.DataFrame(test_features).values)
+
         prediction = trained_model.predict(test_features)
+        prediction = pd.DataFrame(prediction).idxmax(axis=1)
 
         return prediction
 
