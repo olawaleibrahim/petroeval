@@ -333,7 +333,10 @@ class DataHandlers():
             elif check_cardinality(cat_df, column) == 'Low':
                 cat_df = one_hot_encode(cat_df, column)
 
-        return cat_df
+        df.drop(cat_df.columns, axis=1, inplace=True)
+        df = pd.concat((df, cat_df), axis=1)
+
+        return df
 
 
     def set_mnemonics(self, GR, RHOB, RT, NPHI, target=None, depth=False):
