@@ -291,6 +291,9 @@ class DataHandlers():
     def __call__(self):
         return self.
 
+
+    def 
+
     def set_mnemonics(self, GR, RHOB, RT, NPHI, depth=False):
 
         self.GR = GR
