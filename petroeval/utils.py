@@ -63,8 +63,9 @@ def check_cardinality(df, column):
 
 def label_encode(df, column):
 
-    df[column] = df[column].astype('category')
-    df[column] = df[column].cat.codes
+    df[column + '_enc'] = df[column].astype('category')
+    df[column + '_enc'] = df[column + '_enc'].cat.codes
+    df.drop(column, axis=1, inplace=True)
 
     return df
 

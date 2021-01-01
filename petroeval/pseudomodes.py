@@ -231,12 +231,18 @@ class PredictLabels():
                 'ROPA', 'FORCE_2020_LITHOFACIES_LITHOLOGY'] #columns to be dropped
         df = drop_columns(df, *cols)
 
-        df = DataHandlers(df)
-        df = df()
+        #df = DataHandlers(df)
+        #df = df()
+
+        df = label_encode(df, 'GROUP')
+        df = label_encode(df, 'FORMATION')
+        df = label_encode(df, 'WELL')
 
         print(f'Shape of dataframe before augmentation: {df.shape}')
         df, padded_rows = augment_features(df.values, df_wells, df_depth)
         print(f'Shape of dataframe after augmentation: {df.shape}')
+
+        df = pd.DataFrame(df)
 
         return df, lithology
 
@@ -248,13 +254,19 @@ class PredictLabels():
         self.pretrained = pretrained
 
         if pretrained:
-            model = xgb.Booster({'nthred': 4})
-            model.load_model('data/lithofacies_model.model')
+            #model = xgb.Booster()
+            #model.load_model('data/lithofacies_model.model')
+            models = []
+            i = 0
+            for i in range(1, 11):
+                model = xgb.Booster()
+                model.load_model(f'model/lithofacies_model{i}.model')
+                models.append(model)
             #model = joblib.load('data/lithofacies_model.json')
 
         test_features, lithology = self._preprocess(self.df, self.target)
 
-        return model, test_features, lithology   
+        return models, test_features, lithology   
 
     
     def predict(self, target, start, end, model='RF', CV=3):
@@ -265,13 +277,22 @@ class PredictLabels():
         self.end = end
         self.CV = CV
 
-        trained_model, test_features, lithology = self.train(target, start, end)
-        test_features = xgb.DMatrix(pd.DataFrame(test_features).values)
+        #trained_model, test_features, lithology = self.train(target, start, end)
+        trained_models, test_features1, lithology = self.train(target, start, end)
+        test_features = xgb.DMatrix(test_features1.values)
 
-        prediction = trained_model.predict(test_features)
-        prediction = pd.DataFrame(prediction).idxmax(axis=1)
+        predictions = np.zeros((test_features1.shape[0], 12))
+        for model in trained_models:
+            pred = model.predict(test_features)
+            print(pred[:1])
+            predictions += model.predict(test_features)
 
-        return prediction
+        predictions = predictions/10
+        predictions = pd.DataFrame(predictions).idxmax(axis=1)
+        #prediction = trained_model.predict(test_features)
+        #prediction = pd.DataFrame(prediction).idxmax(axis=1)
+
+        return predictions
 
     def plot_feat_imp(self, model, columns):
 
