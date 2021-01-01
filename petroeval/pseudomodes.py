@@ -205,7 +205,7 @@ class PredictLabels():
         self.df = df
         self.target = target
 
-        df.fillna(-9999, inplace=True)
+        df = df.fillna(-9999, inplace=False)
 
         lithology_numbers = {30000: 0,
                         65030: 1,
@@ -221,15 +221,17 @@ class PredictLabels():
                         93000: 11,
                         -9999: 12}
 
-        lithology = df[target]
-        lithology = lithology.map(lithology_numbers)
+        #lithology = df[target]
+        #lithology = lithology.map(lithology_numbers)
+
+        #df = df.drop(target, axis=1, inplace=False)
         
         df_wells = df.WELL.values
         df_depth = df.DEPTH_MD.values
+        df = df.drop('WELL', axis=1, inplace=False)
 
-        cols = ['FORCE_2020_LITHOFACIES_CONFIDENCE', 'SGR', 'DTS', 'RXO', 
-                'ROPA', 'FORCE_2020_LITHOFACIES_LITHOLOGY'] #columns to be dropped
-        df = drop_columns(df, *cols)
+        #cols = ['FORCE_2020_LITHOFACIES_CONFIDENCE', 'SGR', 'DTS', 'RXO', 'ROPA'] #columns to be dropped
+        #df = drop_columns(df, *cols)
 
         #df = DataHandlers(df)
         #df = df()
@@ -240,15 +242,17 @@ class PredictLabels():
         df['GROUP_enc'] = (df.GROUP).map(group_encoded)
         df['FORMATION_enc'] = (df.FORMATION).map(formation_encoded)
 
-        df.drop(['GROUP', 'FORMATION', 'WELL'], axis=1, inplace=True)
+        df = df.drop(['GROUP', 'FORMATION'], axis=1, inplace=False)
+        print(df.head())
 
         print(f'Shape of dataframe before augmentation: {df.shape}')
         df, padded_rows = augment_features(df.values, df_wells, df_depth)
         print(f'Shape of dataframe after augmentation: {df.shape}')
 
         df = pd.DataFrame(df)
+        print(df.head())
 
-        return df, lithology
+        return df
 
 
     def train(self, start, end, pretrained=True):
@@ -266,9 +270,9 @@ class PredictLabels():
                 model.load_model(f'model/lithofacies_model{i}.model')
                 models.append(model)
 
-        test_features, lithology = self._preprocess(self.df, self.target)
+        test_features = self._preprocess(self.df, self.target)
 
-        return models, test_features, lithology   
+        return models, test_features   
 
     
     def predict(self, target, start, end, model='RF', CV=3):
@@ -280,12 +284,11 @@ class PredictLabels():
         self.CV = CV
 
         #trained_model, test_features, lithology = self.train(target, start, end)
-        trained_models, test_features1, lithology = self.train(target, start, end)
+        trained_models, test_features1 = self.train(target, start, end)
         test_features = xgb.DMatrix(test_features1.values)
 
         predictions = np.zeros((test_features1.shape[0], 12))
         for model in trained_models:
-            pred = model.predict(test_features)
             predictions += model.predict(test_features)
 
         predictions = predictions/2
@@ -378,12 +381,12 @@ class DataHandlers():
         
         new_df = pd.DataFrame()
         new_df['WELL'], new_df['DEPTH_MD'], new_df['X_LOC'] = df[WELL], df[DEPTH_MD], df[X_LOC]
-        new_df['Y_LOC'], new_df['Z_LOC'], new_df['X_LOC'] = df[Y_LOC], df[Z_LOC], df[GROUP]
+        new_df['Y_LOC'], new_df['Z_LOC'], new_df['GROUP'] = df[Y_LOC], df[Z_LOC], df[GROUP]
         new_df['FORMATION'], new_df['CALI'], new_df['RSHA'] = df[FORMATION], df[CALI], df[RSHA]
         new_df['RMED'], new_df['RDEP'], new_df['RHOB'] = df[RMED], df[RDEP], df[RHOB]
-        new_df['GR'], new_df['NPHI'], new_df['RMIC'] = df[GR], df[NPHI], df[RMIC]
-        new_df['PEF'], new_df['DTC'], new_df['SP'] = df[PEF], df[DTC], df[SP]
-        new_df['BS'], new_df['ROP'], new_df['DTS'] = df[BS], df[ROP], df[DTS]
-        new_df['DCAL'], new_df['DRHO'], new_df['MUDWEIGHT'] = df[DCAL], df[DRHO], df[MUDWEIGHT]
+        new_df['GR'], new_df['NPHI'], new_df['PEF'] = df[GR], df[NPHI], df[PEF]
+        new_df['DTC'], new_df['SP'], new_df['BS'] = df[DTC], df[SP], df[BS]
+        new_df['BS'], new_df['ROP'] = df[BS], df[ROP]
+        new_df['DCAL'], new_df['DRHO'], new_df['MUDWEIGHT'], new_df['RMIC'] = df[DCAL], df[DRHO], df[MUDWEIGHT], df[RMIC]
 
         return new_df
