@@ -16,7 +16,7 @@ from plots import four_plots
 import xgboost as xgb
 import pandas as pd
 import numpy as np
-import joblib
+import pickle
 
 
 class PredictLitho():
@@ -234,9 +234,13 @@ class PredictLabels():
         #df = DataHandlers(df)
         #df = df()
 
-        df = label_encode(df, 'GROUP')
-        df = label_encode(df, 'FORMATION')
-        df = label_encode(df, 'WELL')
+        group_encoded = pickle.load(open('model/group_encoded', 'rb'))
+        formation_encoded = pickle.load(open('model/formation_encoded', 'rb'))
+
+        df['GROUP_enc'] = (df.GROUP).map(group_encoded)
+        df['FORMATION_enc'] = (df.FORMATION).map(formation_encoded)
+
+        df.drop(['GROUP', 'FORMATION', 'WELL'], axis=1, inplace=True)
 
         print(f'Shape of dataframe before augmentation: {df.shape}')
         df, padded_rows = augment_features(df.values, df_wells, df_depth)
@@ -254,15 +258,13 @@ class PredictLabels():
         self.pretrained = pretrained
 
         if pretrained:
-            #model = xgb.Booster()
-            #model.load_model('data/lithofacies_model.model')
+
             models = []
             i = 0
-            for i in range(1, 11):
+            for i in range(1, 3):
                 model = xgb.Booster()
                 model.load_model(f'model/lithofacies_model{i}.model')
                 models.append(model)
-            #model = joblib.load('data/lithofacies_model.json')
 
         test_features, lithology = self._preprocess(self.df, self.target)
 
@@ -284,13 +286,10 @@ class PredictLabels():
         predictions = np.zeros((test_features1.shape[0], 12))
         for model in trained_models:
             pred = model.predict(test_features)
-            print(pred[:1])
             predictions += model.predict(test_features)
 
-        predictions = predictions/10
+        predictions = predictions/2
         predictions = pd.DataFrame(predictions).idxmax(axis=1)
-        #prediction = trained_model.predict(test_features)
-        #prediction = pd.DataFrame(prediction).idxmax(axis=1)
 
         return predictions
 
