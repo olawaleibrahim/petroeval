@@ -359,19 +359,31 @@ class DataHandlers():
         return df
 
 
-    def set_mnemonics(self, GR, RHOB, RT, NPHI, target=None, depth=False):
+    def set_mnemonics(self, GR='GR', RHOB='RHOB', NPHI='NPHI', CALI='CALI', BS='BS', RDEP='RDEP',
+                      RMED='RMED', RSHA='RSHA', PEF='PEF', DTC='DTC', SP='SP', ROP='ROP', DTS='DTS', 
+                      DCAL='DCAL', DRHO='DRHO', MUDWEIGHT='MUDWEIGHT', RMIC='RMIC', ROPA='ROPA', 
+                      RXO='RXO', GROUP='GROUP', FORMATION='FORMATION', X_LOC='X_LOC', Y_LOC='Y_LOC', 
+                      Z_LOC='Z_LOC', DEPTH_MD='DEPTH_MD', WELL='WELL', target=None, depth=False):
 
-        self.GR = GR
-        self.RHOB = RHOB
-        self.RT = RT
-        self.NPHI = NPHI
-        self.depth = depth
-        self.target = target
-        df = self.df
+        self.GR, self.RHOB, self.NPHI, self.CALI, self.BS, self.RDEP = GR, RHOB, NPHI, CALI, BS, RDEP
+        self.RMED, self.RSHA, self.PEF, self.DTC, self.SP, self.ROP, self.DTS = RMED, RSHA, PEF, DTC, SP, ROP, DTS
+        self.DCAL, self.DRHO, self.MUDWEIGHT, self.RMIC, self.ROPA = DCAL, DRHO, MUDWEIGHT, RMIC, ROPA
+        self.RXO, self.GROUP, self.FORMATION, self.X_LOC, self.Y_LOC, self.Z_LOC = RXO, GROUP, FORMATION, X_LOC, Y_LOC, Z_LOC
+        self.depth, self.DEPTH_MD, self.target, self.WELL, df = depth, DEPTH_MD, target, WELL, self.df
 
         if depth == False:
             df['depth'] = df.index
 
-        df = preprocessing.set_mnemonics(self.df, GR, NPHI, RHOB, RT)
+        #df = preprocessing.set_mnemonics(self.df, GR, NPHI, RHOB, RT)
+        
+        new_df = pd.DataFrame()
+        new_df['WELL'], new_df['DEPTH_MD'], new_df['X_LOC'] = df[WELL], df[DEPTH_MD], df[X_LOC]
+        new_df['Y_LOC'], new_df['Z_LOC'], new_df['X_LOC'] = df[Y_LOC], df[Z_LOC], df[GROUP]
+        new_df['FORMATION'], new_df['CALI'], new_df['RSHA'] = df[FORMATION], df[CALI], df[RSHA]
+        new_df['RMED'], new_df['RDEP'], new_df['RHOB'] = df[RMED], df[RDEP], df[RHOB]
+        new_df['GR'], new_df['NPHI'], new_df['RMIC'] = df[GR], df[NPHI], df[RMIC]
+        new_df['PEF'], new_df['DTC'], new_df['SP'] = df[PEF], df[DTC], df[SP]
+        new_df['BS'], new_df['ROP'], new_df['DTS'] = df[BS], df[ROP], df[DTS]
+        new_df['DCAL'], new_df['DRHO'], new_df['MUDWEIGHT'] = df[DCAL], df[DRHO], df[MUDWEIGHT]
 
-        return df
+        return new_df
