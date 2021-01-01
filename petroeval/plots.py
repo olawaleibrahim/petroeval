@@ -150,7 +150,7 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
 
     '''
 
-    logs = process(loogs)
+    logs = process(logs)
 
     #Setting the value of the y axis. Using index or property specified
     if depth == False:

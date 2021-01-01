@@ -42,7 +42,7 @@ class PredictLitho():
         self.start = start
         self.end = end
 
-        df.fillna(-9999, inplace=True)
+        df = df.fillna(-9999, inplace=False)
 
         #new_df = (df.drop(target, axis=1))
         new_df = df.copy()
@@ -75,8 +75,8 @@ class PredictLitho():
         bottom_target = new_df.iloc[new_df[new_df['depth'] == end].index[0]: ]
 
         train_features = pd.concat((top_df, bottom_df), axis=0)
-        train_features.drop(target, axis=1, inplace=True)
-        test_features.drop(target, axis=1, inplace=True)
+        train_features = train_features.drop(target, axis=1, inplace=False)
+        test_features = test_features.drop(target, axis=1, inplace=False)
 
         columns = list(train_features.columns)
 
@@ -93,8 +93,8 @@ class PredictLitho():
         
         # dropping added depth column which was used to aid preprocessing
 
-        train_features.drop('depth', axis=1, inplace=True)
-        test_features.drop('depth', axis=1, inplace=True)
+        train_features = train_features.drop('depth', axis=1, inplace=False)
+        test_features = test_features.drop('depth', axis=1, inplace=False)
 
         return train_features, train_target, test_features
 
@@ -115,7 +115,7 @@ class PredictLitho():
         except ValueError as err:
             print(err)
 
-        train_features, train_target, test_features = self._preprocess(self.df, self.target, start, end)
+        train_features, train_target, test_features = self._preprocess(df, target, start, end)
 
         #print(f'Train features: {train_features.head(3)}')
         #print(f'Test features: {test_features.head(3)}')
