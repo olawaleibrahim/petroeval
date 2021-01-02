@@ -117,9 +117,6 @@ class PredictLitho():
 
         train_features, train_target, test_features = self._preprocess(df, target, start, end)
 
-        #print(f'Train features: {train_features.head(3)}')
-        #print(f'Test features: {test_features.head(3)}')
-
         # divide dataframe into train part and part needed for prediction
 
         '''
@@ -140,7 +137,6 @@ class PredictLitho():
         X_train, X_test, y_train, y_test = ms.train_test_split(train_features, train_target,
                                                                 test_size=0.2, random_state=20)
 
-        print(f'(X_train, y_train): {X_train.shape, y_train.shape}, (X_test, y_test): {X_test.shape, y_test.shape}')
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         print(f'The test RMSE is : {mean_squared_error(y_test, y_pred) ** 0.5}')
@@ -200,26 +196,12 @@ class PredictLabels():
         return self.train(plot)
 
 
-    def _preprocess(self, df, target):
+    def _preprocess(self, df):
         
         self.df = df
-        self.target = target
 
         df = df.fillna(-9999, inplace=False)
 
-        lithology_numbers = {30000: 0,
-                        65030: 1,
-                        65000: 2,
-                        80000: 3,
-                        74000: 4,
-                        70000: 5,
-                        70032: 6,
-                        88000: 7,
-                        86000: 8,
-                        99000: 9,
-                        90000: 10,
-                        93000: 11,
-                        -9999: 12}
 
         #lithology = df[target]
         #lithology = lithology.map(lithology_numbers)
@@ -243,14 +225,13 @@ class PredictLabels():
         df['FORMATION_enc'] = (df.FORMATION).map(formation_encoded)
 
         df = df.drop(['GROUP', 'FORMATION'], axis=1, inplace=False)
-        print(df.head())
 
+        print('Augmenting features...')
         print(f'Shape of dataframe before augmentation: {df.shape}')
         df, padded_rows = augment_features(df.values, df_wells, df_depth)
         print(f'Shape of dataframe after augmentation: {df.shape}')
 
         df = pd.DataFrame(df)
-        print(df.head())
 
         return df
 
@@ -270,33 +251,54 @@ class PredictLabels():
                 model.load_model(f'model/lithofacies_model{i}.model')
                 models.append(model)
 
-        test_features = self._preprocess(self.df, self.target)
+        test_features = self._preprocess(self.df)
 
         return models, test_features   
 
     
-    def predict(self, target, start, end, model='RF', CV=3):
+    def predict(self, start, end, model='RF', CV=3):
+
+        '''
+        Method used in making prediction
+        returns: prediction values
+
+        args::
+            target:
+        '''
 
         self.model = model
-        self.target = target
         self.start = start
         self.end = end
         self.CV = CV
 
-        #trained_model, test_features, lithology = self.train(target, start, end)
-        trained_models, test_features1 = self.train(target, start, end)
+        trained_models, test_features1 = self.train(start, end)
         test_features = xgb.DMatrix(test_features1.values)
 
         predictions = np.zeros((test_features1.shape[0], 12))
+        i = 1
         for model in trained_models:
             predictions += model.predict(test_features)
+            print(f'Model {i}, predicting...')
+            i += 1
 
         predictions = predictions/2
         predictions = pd.DataFrame(predictions).idxmax(axis=1)
+        print('Predictions complete!')
 
         return predictions
 
     def plot_feat_imp(self, model, columns):
+
+        '''
+        Method to plot the feature importance of the model in a bar chart
+        according to rank (importance)
+
+        returns: plot of the features importance
+
+        args::
+            model: trained model object
+            columns: features names used for training (dataframe.columns)
+        '''
 
         self.columns = columns
         self.model = model
@@ -315,8 +317,8 @@ class PredictLabels():
 class DataHandlers():
 
     '''
-    Will handle the preprocessing of the dataframe for categorical and numerical variables
-    as well as handling different mnemonics issues
+    Handle the preprocessing of the dataframe for categorical and numerical variables
+    as well as handling different mnemonics issues.
     '''
 
     def __init__(self, df):
@@ -333,11 +335,19 @@ class DataHandlers():
 
     def encode_categorical(self):
 
+        '''
+        Method for encoding categorical variables in a dataframe
+
+        returns: dataframe with the categorical variables encoded
+        based on their cardinality
+        
+        '''
+
         df = self.df
 
         columns = list(df.columns)
 
-        cat_df = pd.DataFrame()
+        cat_df = pd.DataFrame()   #categorical dataframe
 
         for column in columns:
             if df[column].dtype == object:
@@ -347,6 +357,7 @@ class DataHandlers():
 
         for column in cat_df.columns:
 
+            # if cardinality is too high/feature is distinct (e.g. a unique ID column), the column will be dropped
             if check_cardinality(cat_df, column) == 'Unique' or check_cardinality(cat_df, column) == 'Distinct':
                 cat_df.drop(column, axis=1, inplace=True)
 
@@ -356,7 +367,7 @@ class DataHandlers():
             elif check_cardinality(cat_df, column) == 'Low':
                 cat_df = one_hot_encode(cat_df, column)
 
-        df.drop(cat_df.columns, axis=1, inplace=True)
+        df = df.drop(cat_df.columns, axis=1, inplace=False)
         df = pd.concat((df, cat_df), axis=1)
 
         return df
@@ -368,6 +379,19 @@ class DataHandlers():
                       RXO='RXO', GROUP='GROUP', FORMATION='FORMATION', X_LOC='X_LOC', Y_LOC='Y_LOC', 
                       Z_LOC='Z_LOC', DEPTH_MD='DEPTH_MD', WELL='WELL', target=None, depth=False):
 
+        '''
+        Method to set well mnemonics
+        This preprocessing is necessary to have the data in the right format for prediction
+        by the pretrained model
+
+        returns: dataframe with 24 log types (the arguments passed)
+        args::
+            Well curves. Default mnemonics are used. Specify the curve value in 
+            cases of different value. Specify False if curve does not appear in
+            the data/well.
+        Set arguments/logs to False if they are not present in well data
+        '''
+
         self.GR, self.RHOB, self.NPHI, self.CALI, self.BS, self.RDEP = GR, RHOB, NPHI, CALI, BS, RDEP
         self.RMED, self.RSHA, self.PEF, self.DTC, self.SP, self.ROP, self.DTS = RMED, RSHA, PEF, DTC, SP, ROP, DTS
         self.DCAL, self.DRHO, self.MUDWEIGHT, self.RMIC, self.ROPA = DCAL, DRHO, MUDWEIGHT, RMIC, ROPA
@@ -377,7 +401,9 @@ class DataHandlers():
         if depth == False:
             df['depth'] = df.index
 
-        #df = preprocessing.set_mnemonics(self.df, GR, NPHI, RHOB, RT)
+        if WELL == False:
+            df['WELL'] = 'Same Well'
+            
         
         new_df = pd.DataFrame()
         new_df['WELL'], new_df['DEPTH_MD'], new_df['X_LOC'] = df[WELL], df[DEPTH_MD], df[X_LOC]

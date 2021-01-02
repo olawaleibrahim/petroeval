@@ -65,7 +65,7 @@ def label_encode(df, column):
 
     df[column + '_enc'] = df[column].astype('category')
     df[column + '_enc'] = df[column + '_enc'].cat.codes
-    df.drop(column, axis=1, inplace=True)
+    df = df.drop(column, axis=1, inplace=False)
 
     return df
 
