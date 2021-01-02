@@ -182,7 +182,7 @@ class PredictLitho():
             print(sample_evaluation(y_test, y_pred))
 
         elif model == 'XGB':
-            model1.fit(X_train, y_train, eval_set=[(x_train, y_train), (X_test, y_test)], 
+            model1.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_test, y_test)], 
                        early_stopping_rounds=100, verbose=50)
 
             y_pred = model1.predict(X_test)
@@ -191,7 +191,7 @@ class PredictLitho():
         elif model == 'CAT':
             model1.fit(X_train, y_train, eval_set=[(X_test, y_test)], 
                        early_stopping_rounds=100, verbose=50)
-                       
+
             y_pred = model1.predict(X_test)
             print(sample_evaluation(y_test, y_pred))
 
