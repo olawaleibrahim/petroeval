@@ -27,6 +27,12 @@ class PredictLitho():
 
     def __init__(self, df, depth_col, plot=True):
 
+        '''
+        args::
+            df: dataframe
+            depth_col: depth column, specify False if absent
+        '''
+
         self.df = df
         self.depth_col = depth_col
         self.plot = plot
@@ -37,6 +43,21 @@ class PredictLitho():
     
     def _preprocess(self, df, target, start, end):
 
+        '''
+        Method for preprocessing data by generating train features and labels
+        using the specified start and end points and also to generate the 
+        portion of the data needed for predictions (test features). This is done in
+        a way to prevent data leakage while still using the maximum data points
+        for a better accuracy
+        returns: train features, train target, test features
+
+        args::
+            df: dataframe to be preprocessed
+            target: column to be predicted
+            start: where prediction should start from
+            end: where prediction should stop
+        '''
+
         self.df = df
         self.target = target
         self.start = start
@@ -44,19 +65,21 @@ class PredictLitho():
 
         df = df.fillna(-9999, inplace=False)
 
-        #new_df = (df.drop(target, axis=1))
         new_df = df.copy()
 
-        columns_ = list(new_df.columns)
-
+        '''
         # dropping columns with categorical contents for easier processing
-
+        columns_ = list(new_df.columns)
+        
         for column in columns_:
             if new_df[column].dtype == 'object':
                 new_df.drop(column, axis=1, inplace=True)
+        '''
+
+        encoding = DataHandlers(new_df)
+        new_df = encoding.encode_categorical()
 
         new_df['depth'] = range(0, new_df.shape[0])
-        #columns = new_df.columns
 
 
         # divide dataframe into train part and part needed for prediction
@@ -100,6 +123,19 @@ class PredictLitho():
 
 
     def train(self, target, start, end, plot, model='RF', CV=3):
+
+        '''
+        Method used in making prediction
+        returns: trained model, test features needed for predictions
+
+        args::
+            target: Column to be predicted
+            start: where prediction should start from
+            end: where prediction should stop
+            model: model to be used; default value is 'RF' for random forest
+                                     other options are 'XG' for XGBoost
+                                                       'CAT' for CatBoost
+        '''
 
         self.model = model
         self.target = target
@@ -150,6 +186,20 @@ class PredictLitho():
 
     def predict(self, target, start, end, model='RF', CV=3):
 
+        '''
+        Method used in making prediction
+        returns: prediction values
+
+        args::
+            target: Column to be predicted
+            start: where prediction should start from
+            end: where prediction should stop
+            model: model to be used; default value is 'RF' for random forest
+                                     other options are 'XG' for XGBoost
+                                                       'CAT' for CatBoost
+                                                       
+        '''
+
         self.model = model
         self.target = target
         self.start = start
@@ -162,6 +212,17 @@ class PredictLitho():
         return prediction
     
     def plot_feat_imp(self, model, columns):
+
+        '''
+        Method to plot the feature importance of the model in a bar chart
+        according to rank (importance)
+
+        returns: plot of the features importance
+
+        args::
+            model: trained model object
+            columns: features names used for training (dataframe.columns)
+        '''
 
         self.columns = columns
         self.model = model
@@ -187,6 +248,12 @@ class PredictLabels():
 
     def __init__(self, df, depth_col, plot=True):
 
+        '''
+        args::
+            df: dataframe for predicting lithofacies
+            depth_col: depth column if available, specify False if not
+        '''
+
         self.df = df
         self.depth_col = depth_col
         self.plot = plot
@@ -197,26 +264,27 @@ class PredictLabels():
 
 
     def _preprocess(self, df):
+
+        '''
+        Preprocessing method: Takes care of missing values, encoding categorical features
+                              augmenting features
+        returns: preprocessed dataframe
+
+        args::
+            df: dataframe to be preprocessed
+        '''
         
         self.df = df
 
         df = df.fillna(-9999, inplace=False)
-
-
-        #lithology = df[target]
-        #lithology = lithology.map(lithology_numbers)
-
-        #df = df.drop(target, axis=1, inplace=False)
         
+        # beginning augmentation procedure
+
         df_wells = df.WELL.values
         df_depth = df.DEPTH_MD.values
+
+        # augmentation procedure terminated to resume below (reasons)
         df = df.drop('WELL', axis=1, inplace=False)
-
-        #cols = ['FORCE_2020_LITHOFACIES_CONFIDENCE', 'SGR', 'DTS', 'RXO', 'ROPA'] #columns to be dropped
-        #df = drop_columns(df, *cols)
-
-        #df = DataHandlers(df)
-        #df = df()
 
         group_encoded = pickle.load(open('model/group_encoded', 'rb'))
         formation_encoded = pickle.load(open('model/formation_encoded', 'rb'))
@@ -228,7 +296,10 @@ class PredictLabels():
 
         print('Augmenting features...')
         print(f'Shape of dataframe before augmentation: {df.shape}')
+        # augmentation procedure continues...
+
         df, padded_rows = augment_features(df.values, df_wells, df_depth)
+        del(padded_rows)
         print(f'Shape of dataframe after augmentation: {df.shape}')
 
         df = pd.DataFrame(df)
@@ -237,6 +308,19 @@ class PredictLabels():
 
 
     def train(self, start, end, pretrained=True):
+
+        '''
+        Training method
+        returns: a list of the pretrained models, test features needed for prediction
+
+        args::
+            start: where prediction should start from
+            end: where prediction should stop
+            pretrained: takes in boolean values; 
+                        True if pretrained models should be used
+                        False if model should be trained from scratch
+
+        '''
 
         self.start = start
         self.end = end
@@ -250,6 +334,9 @@ class PredictLabels():
                 model = xgb.Booster()
                 model.load_model(f'model/lithofacies_model{i}.model')
                 models.append(model)
+
+        else:
+            print('Only pretrained model support is currently available')
 
         test_features = self._preprocess(self.df)
 
@@ -318,6 +405,8 @@ class DataHandlers():
     '''
     Handle the preprocessing of the dataframe for categorical and numerical variables
     as well as handling different mnemonics issues.
+    args::
+        df: dataframe
     '''
 
     def __init__(self, df):
