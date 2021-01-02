@@ -3,7 +3,7 @@ Machine learning module for predicting lithology and lithofacies labels
 and other ML functionalities
 """
 
-from utils import drop_columns, label_encode, one_hot_encode, augment_features, check_cardinality
+from utils import drop_columns, label_encode, one_hot_encode, sample_evaluation, augment_features, check_cardinality
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
@@ -107,6 +107,7 @@ class PredictLitho():
 
         train_target = new_df[target]
 
+        # scaling train and test features
         scaler = StandardScaler().fit(train_features)
         train_features = scaler.transform(train_features)
         test_features = scaler.transform(test_features)
@@ -161,27 +162,43 @@ class PredictLitho():
         is used as the training data set
         '''
 
-        if model == 'RF':
-
-            model = RandomForestRegressor(n_estimators=100, max_depth=6, random_state=42, verbose=2)
-            model.fit(train_features, train_target)
-
-        elif model == 'XGB':
-            model = xgb.XGBRegressor(n_estimators=3000, max_depth=8, reg_lambda=500,
-            random_state=20)
-
         X_train, X_test, y_train, y_test = ms.train_test_split(train_features, train_target,
                                                                 test_size=0.2, random_state=20)
 
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        print(f'The test RMSE is : {mean_squared_error(y_test, y_pred) ** 0.5}')
-        print(f'The test R2 score is : {r2_score(y_test, y_pred)}')
+        if model == 'RF':
+
+            model1 = RandomForestRegressor(n_estimators=100, max_depth=6, random_state=20, verbose=2)
+
+        elif model == 'XGB':
+            model1 = xgb.XGBRegressor(n_estimators=3000, max_depth=6, reg_lambda=300, random_state=20)
+
+        elif model == 'CAT':
+            model1 = cat.CatBoostRegressor(n_estimators=5000, max_depth=6, reg_lambda=300, random_state=20)
+
+        
+        if model == 'RF':
+            model1.fit(X_train, y_train)
+            y_pred = model1.predict(X_test)
+            print(sample_evaluation(y_test, y_pred))
+
+        elif model == 'XGB':
+            model1.fit(X_train, y_train, eval_set=[(x_train, y_train), (X_test, y_test)], 
+                       early_stopping_rounds=100, verbose=50)
+
+            y_pred = model1.predict(X_test)
+            print(sample_evaluation(y_test, y_pred))
+
+        elif model == 'CAT':
+            model1.fit(X_train, y_train, eval_set=[(X_test, y_test)], 
+                       early_stopping_rounds=100, verbose=50)
+                       
+            y_pred = model1.predict(X_test)
+            print(sample_evaluation(y_test, y_pred))
 
         if plot:
-            self.plot_feat_imp(model, list(train_features.columns))
+            self.plot_feat_imp(model1, list(train_features.columns))
 
-        return model, test_features
+        return model1, test_features
 
 
     def predict(self, target, start, end, model='RF', CV=3):
@@ -206,7 +223,7 @@ class PredictLitho():
         self.end = end
         self.CV = CV
 
-        trained_model, test_features = self.train(target, start, end, self.plot, CV=CV)
+        trained_model, test_features = self.train(target, start, end, self.plot, model=model, CV=CV)
         prediction = trained_model.predict(test_features)
 
         return prediction

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.metrics import mean_squared_error, r2_score
 
 def drop_columns(data, *args):
 
@@ -75,6 +76,10 @@ def one_hot_encode(df, column):
 
     return df
 
+def sample_evaluation(y_test, y_pred):
+    
+    print(f'The test RMSE is : {mean_squared_error(y_test, y_pred) ** 0.5}')
+    print(f'The test R2 score is : {r2_score(y_test, y_pred)}')
 
 #Paolo Bestagini's feature augmentation technique from SEG 2016 ML competition
 #Link : https://github.com/seg/2016-ml-contest/tree/master/ispl
