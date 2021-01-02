@@ -16,7 +16,7 @@ from plots import four_plots
 import xgboost as xgb
 import pandas as pd
 import numpy as np
-import pickle
+import pickle, os
 
 
 class PredictLitho():
@@ -246,7 +246,7 @@ class PredictLabels():
 
             models = []
             i = 0
-            for i in range(1, (len(os.listdir('model')) - 1):
+            for i in range(1, (len(os.listdir('model')) - 1)):
                 model = xgb.Booster()
                 model.load_model(f'model/lithofacies_model{i}.model')
                 models.append(model)
@@ -256,20 +256,19 @@ class PredictLabels():
         return models, test_features   
 
     
-    def predict(self, start, end, model='RF', CV=3):
+    def predict(self, start, end):
 
         '''
         Method used in making prediction
         returns: prediction values
 
         args::
-            target:
+            start: where prediction should start from
+            end: where prediction should stop
         '''
 
-        self.model = model
         self.start = start
         self.end = end
-        self.CV = CV
 
         trained_models, test_features1 = self.train(start, end)
         test_features = xgb.DMatrix(test_features1.values)
@@ -281,7 +280,7 @@ class PredictLabels():
             print(f'Model {i}, predicting...')
             i += 1
 
-        predictions = predictions/2
+        predictions = predictions/(len(os.listdir('model')) - 2)
         predictions = pd.DataFrame(predictions).idxmax(axis=1)
         print('Predictions complete!')
 
