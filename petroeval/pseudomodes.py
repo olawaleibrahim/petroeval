@@ -13,6 +13,7 @@ import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import xgboost as XGBRegressor
 from plots import four_plots
+import lightgbm as lgb
 import xgboost as xgb
 import pandas as pd
 import numpy as np
@@ -123,7 +124,7 @@ class PredictLitho():
         return train_features, train_target, test_features
 
 
-    def train(self, target, start, end, plot, model='RF', CV=3):
+    def train(self, target, start, end, plot, model='RF', CV=2):
 
         '''
         Method used in making prediction
@@ -135,7 +136,7 @@ class PredictLitho():
             end: where prediction should stop
             model: model to be used; default value is 'RF' for random forest
                                      other options are 'XG' for XGBoost
-                                                       'CAT' for CatBoost
+                                                       'LGB' for LightGBM
         '''
 
         self.model = model
@@ -146,7 +147,7 @@ class PredictLitho():
         df = self.df
 
         try:
-            if CV < 3:
+            if CV < 2:
                 raise ValueError(f'Number of cross validation folds should be greaterb than 2; {CV} specified')
             
         except ValueError as err:
@@ -172,8 +173,8 @@ class PredictLitho():
         elif model == 'XGB':
             model1 = xgb.XGBRegressor(n_estimators=3000, max_depth=6, reg_lambda=300, random_state=20)
 
-        elif model == 'CAT':
-            model1 = cat.CatBoostRegressor(n_estimators=5000, max_depth=6, reg_lambda=300, random_state=20)
+        elif model == 'LGB':
+            model1 = lgb.LGBMRegressor(n_estimators=3000, max_depth=6, reg_lambda=300, random_state=20)
 
         
         if model == 'RF':
@@ -188,9 +189,9 @@ class PredictLitho():
             y_pred = model1.predict(X_test)
             print(sample_evaluation(y_test, y_pred))
 
-        elif model == 'CAT':
+        elif model == 'LGB':
             model1.fit(X_train, y_train, eval_set=[(X_test, y_test)], 
-                       early_stopping_rounds=100, verbose=50)
+                       early_stopping_rounds=100, verbose=200)
 
             y_pred = model1.predict(X_test)
             print(sample_evaluation(y_test, y_pred))
@@ -201,7 +202,7 @@ class PredictLitho():
         return model1, test_features
 
 
-    def predict(self, target, start, end, model='RF', CV=3):
+    def predict(self, target, start, end, model='RF', CV=2):
 
         '''
         Method used in making prediction
