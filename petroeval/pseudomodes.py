@@ -6,15 +6,15 @@ and other ML functionalities
 from utils import drop_columns, label_encode, one_hot_encode, sample_evaluation, augment_features, check_cardinality
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
+from plots import four_plots, make_facies_log_plot
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
-import preprocessing
 import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import xgboost as XGBRegressor
-from plots import four_plots
 import lightgbm as lgb
 import xgboost as xgb
+import preprocessing
 import pandas as pd
 import numpy as np
 import pickle, os
@@ -313,8 +313,8 @@ class PredictLabels():
 
         df = df.drop(['GROUP', 'FORMATION'], axis=1, inplace=False)
 
-        print('Augmenting features...')
         print(f'Shape of dataframe before augmentation: {df.shape}')
+        print('Augmenting features...')
         # augmentation procedure continues...
 
         df, padded_rows = augment_features(df.values, df_wells, df_depth)
@@ -392,6 +392,7 @@ class PredictLabels():
 
         return predictions
 
+
     def plot_feat_imp(self, model, columns):
 
         '''
@@ -416,7 +417,28 @@ class PredictLabels():
         ax.bar(x, feat_imp)
         ax.set_xticks(x)
         ax.set_xticklabels(columns, rotation='vertical', fontsize=18)
-        ax.set_ylabel('Feature Importance Score') 
+        ax.set_ylabel('Feature Importance Score')
+
+
+    def plot_lithofacies(self, df, predictions, depth_col):
+
+        self.df = df
+        self.predictions = predictions
+        self.depth_col = depth_col
+
+        facies_labels = [
+            'Sandstone', 'Sandstone/Shale', 'Shale', 'Marl', 'Dolomite',
+            'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
+        ]
+        facies_indexes = range(0, len(facies_labels))
+        lithofacies_map = dict(zip(facies_indexes, facies_labels))
+
+        df['predictions'] = predictions
+        facies = df.predictions.map(lithofacies_map)
+        
+        df['Facies'] = predictions
+
+        make_facies_log_plot(df, Depth=depth_col)
 
 
 class DataHandlers():

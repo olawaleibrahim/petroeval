@@ -1,3 +1,4 @@
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 from utils import process
@@ -430,21 +431,39 @@ def one_plot(logs, x1, top, base, depth=False):
     logs[x1] = np.log10(logs[x1])
 
 '''
-This function is adapted and modified from the SEG 2015 tutorials on SEG's
+The function below is adapted and modified from the SEG 2015 tutorials on SEG's
 github page "The Leading Edge column";
 https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
 '''
 
-def make_facies_log_plot(logs, target, facies_colors, depth=False):
+def make_facies_log_plot(logs, Depth=False):
     #make sure logs are sorted by depth
-    #logs = logs.sort_values(by='Depth')
 
-    facies_colors = ['#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72',
-    '#2E86C1', '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#DC7633']
+    if Depth == False:
+        logs['Depth'] = logs.index
+        Depth = 'Depth'
+        
+    logs = logs.sort_values(by=Depth)
 
-    no = len(list(dict(logs[target].value_counts())))
+    facies_colors = [
+        '#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72','#2E86C1', 
+        '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#DC7633'
+    ]
+
+    facies_labels = [
+        'Sandstone', 'Sandstone/Shale', 'Shale', 'Marl', 'Dolomite',
+        'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
+    ]
+
+    facies_colormap = {}
+    for ind, label in enumerate(facies_labels):
+        facies_colormap[label] = facies_colors[ind]
+
+    no = 12
+    #no = len(list(dict(logs[target].value_counts())))
     cmap_facies = colors.ListedColormap(
-            facies_colors[0 : no, 'indexed')
+            facies_colors[0 : no], 'indexed'
+            )
     
     ztop=logs.Depth.min(); zbot=logs.Depth.max()
     
@@ -452,19 +471,20 @@ def make_facies_log_plot(logs, target, facies_colors, depth=False):
     
     f, ax = plt.subplots(nrows=1, ncols=6, figsize=(8, 12))
     ax[0].plot(logs.GR, logs.Depth, '-g')
-    ax[1].plot(logs.ILD_log10, logs.Depth, '-')
-    ax[2].plot(logs.DeltaPHI, logs.Depth, '-', color='0.5')
-    ax[3].plot(logs.PHIND, logs.Depth, '-', color='r')
-    ax[4].plot(logs.PE, logs.Depth, '-', color='black')
+    ax[1].plot(logs.NPHI, logs.Depth, '-')
+    ax[2].plot(logs.RHOB, logs.Depth, '-', color='0.5')
+    ax[3].plot(logs.SP, logs.Depth, '-', color='r')
+    ax[4].plot(logs.RMED, logs.Depth, '-', color='black')
     im=ax[5].imshow(cluster, interpolation='none', aspect='auto',
                     cmap=cmap_facies,vmin=1,vmax=9)
     
     divider = make_axes_locatable(ax[5])
     cax = divider.append_axes("right", size="20%", pad=0.05)
     cbar=plt.colorbar(im, cax=cax)
-    cbar.set_label((17*' ').join([' SS ', 'CSiS', 'FSiS', 
-                                'SiSh', ' MS ', ' WS ', ' D  ', 
-                                ' PS ', ' BS ']))
+    cbar.set_label((17*' ').join([
+        'Sandstone', 'Sandstone/Shale', 'Shale', 'Marl', 'Dolomite',
+        'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
+    ]))
     cbar.set_ticks(range(0,1)); cbar.set_ticklabels('')
     
     for i in range(len(ax)-1):
@@ -474,18 +494,19 @@ def make_facies_log_plot(logs, target, facies_colors, depth=False):
         ax[i].locator_params(axis='x', nbins=3)
     
     ax[0].set_xlabel("GR")
-    ax[0].set_xlim(logs.GR.min(),logs.GR.max())
-    ax[1].set_xlabel("ILD_log10")
-    ax[1].set_xlim(logs.ILD_log10.min(),logs.ILD_log10.max())
-    ax[2].set_xlabel("DeltaPHI")
-    ax[2].set_xlim(logs.DeltaPHI.min(),logs.DeltaPHI.max())
-    ax[3].set_xlabel("PHIND")
-    ax[3].set_xlim(logs.PHIND.min(),logs.PHIND.max())
-    ax[4].set_xlabel("PE")
-    ax[4].set_xlim(logs.PE.min(),logs.PE.max())
+    ax[0].set_xlim(-10,200)
+    ax[1].set_xlabel("NPHI")
+    ax[1].set_xlim(0,1)
+    ax[2].set_xlabel("RHOB")
+    ax[2].set_xlim(1,4)
+    ax[3].set_xlabel("SP")
+    ax[3].set_xlim(logs.SP.min(),logs.SP.max())
+    ax[4].set_xlabel("RMED")
+    ax[4].set_xscale('log')
+    ax[4].set_xlim(logs.RMED.min(),logs.RMED.max())
     ax[5].set_xlabel('Facies')
     
     ax[1].set_yticklabels([]); ax[2].set_yticklabels([]); ax[3].set_yticklabels([])
     ax[4].set_yticklabels([]); ax[5].set_yticklabels([])
     ax[5].set_xticklabels([])
-    f.suptitle('Well: %s'%logs.iloc[0]['Well Name'], fontsize=14,y=0.94)
+    f.suptitle(f"Well: {'WELL'}", fontsize=14,y=0.94)
