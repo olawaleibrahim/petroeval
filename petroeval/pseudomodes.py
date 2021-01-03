@@ -420,14 +420,17 @@ class PredictLabels():
         ax.set_ylabel('Feature Importance Score')
 
 
-    def plot_lithofacies(self, df, predictions, depth_col):
+    def plot_lithofacies(
+        self, df, predictions, log1, log2, log3, log4, log5, depth_col
+    ):
 
         self.df = df
         self.predictions = predictions
+        self.log1, self.log2, self.log3, self.log4, self.log5 = log1, log2, log3, log4, log5
         self.depth_col = depth_col
 
         facies_labels = [
-            'Sandstone', 'Sandstone/Shale', 'Shale', 'Marl', 'Dolomite',
+            'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
             'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
         ]
         facies_indexes = range(0, len(facies_labels))
@@ -440,7 +443,10 @@ class PredictLabels():
 
         for WELL in df['WELL'].unique():
             
-            make_facies_log_plot(df[df['WELL'] == WELL], Depth=depth_col)
+            make_facies_log_plot(
+                (df[df['WELL'] == WELL]), log1, log2, 
+                log3, log4, log5, Depth=depth_col
+            )
 
 
 class DataHandlers():

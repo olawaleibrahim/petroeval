@@ -31,10 +31,11 @@ def process(df):
     cols = list(df.columns)
     for _ in cols:
 
+        df = df.fillna(0)
         #df[_] = np.where(df[_] == np.inf, 0, df[_])
         df.loc[df[_] == np.inf] = 0
         #df[_] = np.where(df[_] == np.nan, 0, df[_])
-        df.loc[df[_] == np.NaN] = 0
+        df.loc[df[_] == np.nan] = 0
         #df[_] = np.where(df[_] == -np.inf, 0, df[_])
         df.loc[df[_] == -np.inf] = 0
         

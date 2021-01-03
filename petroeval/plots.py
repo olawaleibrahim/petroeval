@@ -436,23 +436,29 @@ github page "The Leading Edge column";
 https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
 '''
 
-def make_facies_log_plot(logs, Depth=False):
+def make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False):
     #make sure logs are sorted by depth
 
-    df = process(df)
+    logs = logs.fillna(0)
     if Depth == False:
         logs['Depth'] = logs.index
         Depth = 'Depth'
+        ztop=logs.Depth.min(); zbot=logs.Depth.max()
+    
+    else:
+        logs['Depth'] = logs[Depth]
+        Depth = 'Depth'
+        ztop=logs.Depth.max(); zbot=logs.Depth.min()
         
-    logs = logs.sort_values(by=Depth)
+    logs = logs.sort_values(by='Depth', ascending=False)
 
     facies_colors = [
         '#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72','#2E86C1', 
-        '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#00000'
+        '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#000000'
     ]
 
     facies_labels = [
-        'Sandstone', 'Sandstone/Shale', 'Shale', 'Marl', 'Dolomite',
+        'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
         'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
     ]
 
@@ -465,19 +471,17 @@ def make_facies_log_plot(logs, Depth=False):
     cmap_facies = colors.ListedColormap(
             facies_colors[0 : no], 'indexed'
             )
-    
-    ztop=logs.Depth.min(); zbot=logs.Depth.max()
-    
+
     cluster=np.repeat(np.expand_dims(logs['Facies'].values,1), 100, 1)
     
     f, ax = plt.subplots(nrows=1, ncols=6, figsize=(12, 12))
-    ax[0].plot(logs.GR, logs.Depth, '-g')
-    ax[1].plot(logs.NPHI, logs.Depth, '-')
-    ax[2].plot(logs.RHOB, logs.Depth, '-', color='0.5')
-    ax[3].plot(logs.SP, logs.Depth, '-', color='r')
-    ax[4].plot(logs.RMED, logs.Depth, '-', color='black')
+    ax[0].plot(logs[x1], logs.Depth, '-g')
+    ax[1].plot(logs[x2], logs.Depth, '-')
+    ax[2].plot(logs[x3], logs.Depth, '-', color='0.5')
+    ax[3].plot(logs[x4], logs.Depth, '-', color='r')
+    ax[4].plot(logs[x5], logs.Depth, '-', color='black')
     im=ax[5].imshow(cluster, interpolation='none', aspect='auto',
-                    cmap=cmap_facies,vmin=1,vmax=12)
+                    cmap=cmap_facies,vmin=0,vmax=12)
     
     divider = make_axes_locatable(ax[5])
     cax = divider.append_axes("right", size="20%", pad=0.05)
@@ -494,17 +498,16 @@ def make_facies_log_plot(logs, Depth=False):
         ax[i].grid()
         ax[i].locator_params(axis='x', nbins=3)
     
-    ax[0].set_xlabel("GR")
-    ax[0].set_xlim(-10,200)
-    ax[1].set_xlabel("NPHI")
-    ax[1].set_xlim(0,1)
-    ax[2].set_xlabel("RHOB")
-    ax[2].set_xlim(1,4)
-    ax[3].set_xlabel("SP")
-    ax[3].set_xlim(log.SP.min(),logs.SP.max())
-    ax[4].set_xlabel("RMED")
-    ax[4].set_xscale('log')
-    ax[4].set_xlim(logs.RMED.min(),logs.RMED.max())
+    ax[0].set_xlabel(x1)
+    ax[0].set_xlim(logs[x1].min(), logs[x1].max())
+    ax[1].set_xlabel(x2)
+    ax[1].set_xlim(logs[x2].min(), logs[x2].max())
+    ax[2].set_xlabel(x3)
+    ax[2].set_xlim(logs[x3].min(), logs[x3].max())
+    ax[3].set_xlabel(x4)
+    ax[3].set_xlim(logs[x4].min(), logs[x4].max())
+    ax[4].set_xlabel(x5)
+    ax[4].set_xlim(logs[x5].min(), logs[x5].max())
     ax[5].set_xlabel('Facies')
     
     ax[1].set_yticklabels([]); ax[2].set_yticklabels([]); ax[3].set_yticklabels([])
