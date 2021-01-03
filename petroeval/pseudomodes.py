@@ -147,17 +147,18 @@ class PredictLitho():
         df = self.df
 
         try:
-            if CV < 2:
-                raise ValueError(f'Number of cross validation folds should be greaterb than 2; {CV} specified')
+            if CV < 3:
+                raise ValueError(f'Number of cross validation folds should be greater than 2; {CV} specified')
             
         except ValueError as err:
             print(err)
 
         train_features, train_target, test_features = self._preprocess(df, target, start, end)
 
-        # divide dataframe into train part and part needed for prediction
 
         '''
+        Divide dataframe into train part and part needed for prediction:
+
         The idea is to use the depth column and the range passed by the parameters.
         The range specified represent the range needed for prediction. Every other part 
         is used as the training data set

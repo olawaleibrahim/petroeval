@@ -1,3 +1,4 @@
+import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 from utils import process
 import numpy as np
@@ -427,3 +428,64 @@ def one_plot(logs, x1, top, base, depth=False):
         print(f'Depth column could not be located. {err}')
 
     logs[x1] = np.log10(logs[x1])
+
+'''
+This function is adapted and modified from the SEG 2015 tutorials on SEG's
+github page "The Leading Edge column";
+https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
+'''
+
+def make_facies_log_plot(logs, target, facies_colors, depth=False):
+    #make sure logs are sorted by depth
+    #logs = logs.sort_values(by='Depth')
+
+    facies_colors = ['#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72',
+    '#2E86C1', '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#DC7633']
+
+    no = len(list(dict(logs[target].value_counts())))
+    cmap_facies = colors.ListedColormap(
+            facies_colors[0 : no, 'indexed')
+    
+    ztop=logs.Depth.min(); zbot=logs.Depth.max()
+    
+    cluster=np.repeat(np.expand_dims(logs['Facies'].values,1), 100, 1)
+    
+    f, ax = plt.subplots(nrows=1, ncols=6, figsize=(8, 12))
+    ax[0].plot(logs.GR, logs.Depth, '-g')
+    ax[1].plot(logs.ILD_log10, logs.Depth, '-')
+    ax[2].plot(logs.DeltaPHI, logs.Depth, '-', color='0.5')
+    ax[3].plot(logs.PHIND, logs.Depth, '-', color='r')
+    ax[4].plot(logs.PE, logs.Depth, '-', color='black')
+    im=ax[5].imshow(cluster, interpolation='none', aspect='auto',
+                    cmap=cmap_facies,vmin=1,vmax=9)
+    
+    divider = make_axes_locatable(ax[5])
+    cax = divider.append_axes("right", size="20%", pad=0.05)
+    cbar=plt.colorbar(im, cax=cax)
+    cbar.set_label((17*' ').join([' SS ', 'CSiS', 'FSiS', 
+                                'SiSh', ' MS ', ' WS ', ' D  ', 
+                                ' PS ', ' BS ']))
+    cbar.set_ticks(range(0,1)); cbar.set_ticklabels('')
+    
+    for i in range(len(ax)-1):
+        ax[i].set_ylim(ztop,zbot)
+        ax[i].invert_yaxis()
+        ax[i].grid()
+        ax[i].locator_params(axis='x', nbins=3)
+    
+    ax[0].set_xlabel("GR")
+    ax[0].set_xlim(logs.GR.min(),logs.GR.max())
+    ax[1].set_xlabel("ILD_log10")
+    ax[1].set_xlim(logs.ILD_log10.min(),logs.ILD_log10.max())
+    ax[2].set_xlabel("DeltaPHI")
+    ax[2].set_xlim(logs.DeltaPHI.min(),logs.DeltaPHI.max())
+    ax[3].set_xlabel("PHIND")
+    ax[3].set_xlim(logs.PHIND.min(),logs.PHIND.max())
+    ax[4].set_xlabel("PE")
+    ax[4].set_xlim(logs.PE.min(),logs.PE.max())
+    ax[5].set_xlabel('Facies')
+    
+    ax[1].set_yticklabels([]); ax[2].set_yticklabels([]); ax[3].set_yticklabels([])
+    ax[4].set_yticklabels([]); ax[5].set_yticklabels([])
+    ax[5].set_xticklabels([])
+    f.suptitle('Well: %s'%logs.iloc[0]['Well Name'], fontsize=14,y=0.94)
