@@ -439,6 +439,7 @@ https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
 def make_facies_log_plot(logs, Depth=False):
     #make sure logs are sorted by depth
 
+    df = process(df)
     if Depth == False:
         logs['Depth'] = logs.index
         Depth = 'Depth'
@@ -447,7 +448,7 @@ def make_facies_log_plot(logs, Depth=False):
 
     facies_colors = [
         '#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72','#2E86C1', 
-        '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#DC7633'
+        '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#00000'
     ]
 
     facies_labels = [
@@ -469,20 +470,20 @@ def make_facies_log_plot(logs, Depth=False):
     
     cluster=np.repeat(np.expand_dims(logs['Facies'].values,1), 100, 1)
     
-    f, ax = plt.subplots(nrows=1, ncols=6, figsize=(8, 12))
+    f, ax = plt.subplots(nrows=1, ncols=6, figsize=(12, 12))
     ax[0].plot(logs.GR, logs.Depth, '-g')
     ax[1].plot(logs.NPHI, logs.Depth, '-')
     ax[2].plot(logs.RHOB, logs.Depth, '-', color='0.5')
     ax[3].plot(logs.SP, logs.Depth, '-', color='r')
     ax[4].plot(logs.RMED, logs.Depth, '-', color='black')
     im=ax[5].imshow(cluster, interpolation='none', aspect='auto',
-                    cmap=cmap_facies,vmin=1,vmax=9)
+                    cmap=cmap_facies,vmin=1,vmax=12)
     
     divider = make_axes_locatable(ax[5])
     cax = divider.append_axes("right", size="20%", pad=0.05)
     cbar=plt.colorbar(im, cax=cax)
-    cbar.set_label((17*' ').join([
-        'Sandstone', 'Sandstone/Shale', 'Shale', 'Marl', 'Dolomite',
+    cbar.set_label((7*' ').join([
+        'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
         'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
     ]))
     cbar.set_ticks(range(0,1)); cbar.set_ticklabels('')
@@ -500,7 +501,7 @@ def make_facies_log_plot(logs, Depth=False):
     ax[2].set_xlabel("RHOB")
     ax[2].set_xlim(1,4)
     ax[3].set_xlabel("SP")
-    ax[3].set_xlim(logs.SP.min(),logs.SP.max())
+    ax[3].set_xlim(log.SP.min(),logs.SP.max())
     ax[4].set_xlabel("RMED")
     ax[4].set_xscale('log')
     ax[4].set_xlim(logs.RMED.min(),logs.RMED.max())
@@ -509,4 +510,4 @@ def make_facies_log_plot(logs, Depth=False):
     ax[1].set_yticklabels([]); ax[2].set_yticklabels([]); ax[3].set_yticklabels([])
     ax[4].set_yticklabels([]); ax[5].set_yticklabels([])
     ax[5].set_xticklabels([])
-    f.suptitle(f"Well: {'WELL'}", fontsize=14,y=0.94)
+    f.suptitle('Well: %s'%logs.iloc[0]['WELL'], fontsize=14,y=0.94)

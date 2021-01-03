@@ -438,7 +438,9 @@ class PredictLabels():
         
         df['Facies'] = predictions
 
-        make_facies_log_plot(df, Depth=depth_col)
+        for WELL in df['WELL'].unique():
+            
+            make_facies_log_plot(df[df['WELL'] == WELL], Depth=depth_col)
 
 
 class DataHandlers():
