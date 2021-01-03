@@ -514,3 +514,87 @@ def make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False):
     ax[4].set_yticklabels([]); ax[5].set_yticklabels([])
     ax[5].set_xticklabels([])
     f.suptitle('Well: %s'%logs.iloc[0]['WELL'], fontsize=14,y=0.94)
+
+
+def compare_plots(logs, x1, x2, x3, x4, x5, Depth=False):
+    #make sure logs are sorted by depth
+
+    logs = logs.fillna(0)
+    if Depth == False:
+        logs['Depth'] = logs.index
+        Depth = 'Depth'
+        ztop=logs.Depth.min(); zbot=logs.Depth.max()
+    
+    else:
+        logs['Depth'] = logs[Depth]
+        Depth = 'Depth'
+        ztop=logs.Depth.max(); zbot=logs.Depth.min()
+        
+    logs = logs.sort_values(by='Depth', ascending=False)
+
+    facies_colors = [
+        '#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72','#2E86C1', 
+        '#AED6F1', '#A569BD', '#196F3D', '#10003D', '#A56222', '#000000'
+    ]
+
+    facies_labels = [
+        'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
+        'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
+    ]
+
+    facies_colormap = {}
+    for ind, label in enumerate(facies_labels):
+        facies_colormap[label] = facies_colors[ind]
+
+    no = 12
+    #no = len(list(dict(logs[target].value_counts())))
+    cmap_facies = colors.ListedColormap(
+            facies_colors[0 : no], 'indexed'
+            )
+
+    cluster1=np.repeat(np.expand_dims(logs['Facies'].values,1), 100, 1)
+    cluster2=np.repeat(np.expand_dims(logs['Actual'].values,1), 100, 1)
+    
+    f, ax = plt.subplots(nrows=1, ncols=7, figsize=(12, 12))
+    ax[0].plot(logs[x1], logs.Depth, '-g')
+    ax[1].plot(logs[x2], logs.Depth, '-')
+    ax[2].plot(logs[x3], logs.Depth, '-', color='0.5')
+    ax[3].plot(logs[x4], logs.Depth, '-', color='r')
+    ax[4].plot(logs[x5], logs.Depth, '-', color='black')
+    im=ax[5].imshow(cluster1, interpolation='none', aspect='auto',
+                    cmap=cmap_facies,vmin=0,vmax=12)
+    im=ax[6].imshow(cluster2, interpolation='none', aspect='auto',
+                    cmap=cmap_facies,vmin=0,vmax=12)
+    
+    divider = make_axes_locatable(ax[6])
+    cax = divider.append_axes("right", size="20%", pad=0.05)
+    cbar=plt.colorbar(im, cax=cax)
+    cbar.set_label((7*' ').join([
+        'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
+        'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
+    ]))
+    cbar.set_ticks(range(0,1)); cbar.set_ticklabels('')
+    
+    for i in range(len(ax)-2):
+        ax[i].set_ylim(ztop,zbot)
+        ax[i].invert_yaxis()
+        ax[i].grid()
+        ax[i].locator_params(axis='x', nbins=3)
+    
+    ax[0].set_xlabel(x1)
+    ax[0].set_xlim(logs[x1].min(), logs[x1].max())
+    ax[1].set_xlabel(x2)
+    ax[1].set_xlim(logs[x2].min(), logs[x2].max())
+    ax[2].set_xlabel(x3)
+    ax[2].set_xlim(logs[x3].min(), logs[x3].max())
+    ax[3].set_xlabel(x4)
+    ax[3].set_xlim(logs[x4].min(), logs[x4].max())
+    ax[4].set_xlabel(x5)
+    ax[4].set_xlim(logs[x5].min(), logs[x5].max())
+    ax[5].set_xlabel('Predictions')
+    ax[6].set_xlabel('Actual')
+    
+    ax[1].set_yticklabels([]); ax[2].set_yticklabels([]); ax[3].set_yticklabels([])
+    ax[4].set_yticklabels([]); ax[5].set_yticklabels([]); ax[6].set_yticklabels([])
+    ax[6].set_xticklabels([]); 
+    f.suptitle('Well: %s'%logs.iloc[0]['WELL'], fontsize=14,y=0.94)

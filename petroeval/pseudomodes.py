@@ -4,9 +4,9 @@ and other ML functionalities
 """
 
 from utils import drop_columns, label_encode, one_hot_encode, sample_evaluation, augment_features, check_cardinality
+from plots import four_plots, make_facies_log_plot, compare_plots
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
-from plots import four_plots, make_facies_log_plot
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 import sklearn.model_selection as ms
@@ -229,6 +229,7 @@ class PredictLitho():
         prediction = trained_model.predict(test_features)
 
         return prediction
+
     
     def plot_feat_imp(self, model, columns):
 
@@ -447,6 +448,46 @@ class PredictLabels():
                 (df[df['WELL'] == WELL]), log1, log2, 
                 log3, log4, log5, Depth=depth_col
             )
+
+    
+    def compare_lithofacies(
+        self, df, label, predictions, log1, log2, log3, log4, log5, depth_col
+    ):
+
+        self.df = df
+        self.label, self.predictions = label, predictions
+        self.log1, self.log2, self.log3, self.log4, self.log5 = log1, log2, log3, log4, log5
+        self.depth_col = depth_col
+
+        facies_labels = [
+            'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
+            'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
+        ]
+        facies_indexes = range(0, len(facies_labels))
+        lithofacies_map = dict(zip(facies_indexes, facies_labels))
+
+        '''
+        df['predicted_labels'] = predictions
+        #facies = df.predictions.map(lithofacies_map)
+        
+        df['Actual'] = label
+        #df['Label'] = df[label]
+        '''
+        df['Facies'] = predictions
+        df['Actual'] = label
+
+        for WELL in df['WELL'].unique():
+            
+            '''
+            #new_df = df[df['WELL'] == WELL]
+            compare_plots(
+                df[df['WELL'] == WELL], 'Actual', 'predicted_labels', log1, log2, 
+                log3, log4, log5, Depth=depth_col
+            )
+            '''
+            compare_plots(
+                df[df['WELL'] == WELL], log1, log2, log3, log4, log5, Depth=depth_col
+                )
 
 
 class DataHandlers():
