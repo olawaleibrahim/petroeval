@@ -5,14 +5,13 @@ and other ML functionalities
 
 from utils import prepare_datasets, label_encode, sample_evaluation, scale_train_test
 from utils import augment_features, check_cardinality, drop_columns, one_hot_encode
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from plots import four_plots, make_facies_log_plot, compare_plots
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
-import xgboost as XGBRegressor
 import lightgbm as lgb
 import xgboost as xgb
 import preprocessing
@@ -403,7 +402,7 @@ class PredictLabels():
         return train_features, test_features, train_target
 
 
-    def train(self, train_df, target, start=None, end=None, test_df=None, model='RF'):
+    def _train(self, train_df, target, start=None, end=None, test_df=None, model='RF'):
 
         '''
         Training method
@@ -424,12 +423,29 @@ class PredictLabels():
 
         train_features, test_features, train_target = self.prepare(train_df, test_df, start, end)
 
-        model.fit(train_features, train_target)
+        if model == 'RF':
+            model1 = RandomForestClassifier(
+                                            n_estimators=250, max_depth=10, 
+                                            class_weight='balanced', verbose=2, 
+                                            random_state=20
+                                            )
+            model1.fit(train_features, train_target)
+        
+        elif model == 'XGB':
 
-        return model, test_features
+            X_train, X_test, y_train, y_test = ms.train_test_split(
+                train_features, test_features, test_size=0.2, stratify=train_target
+            )
+            model1 = xgb.XGBClassifier(
+                                       n_estimators=5000, max_depth=10, 
+                                       reg_lambda=300, random_state=20, tree_method='gpu_hist'
+                                       )
+            model1.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=100)
+            
+        return model1, test_features
 
     
-    def predict(self, start, end, model=False):
+    def predict(self, train_df=None, test_df=None, target=None, start=None, end=None, model=False):
 
         '''
         Method used in making prediction
@@ -440,12 +456,11 @@ class PredictLabels():
             end: where prediction should stop
         '''
 
-        self.start = start
-        self.end = end
-        self.model = model
+        self.start, self.end = start, end
+        self.train_df, self.test_df = train_df, test_df
+        self.model, self.target = model, target
 
         if model == False:
-
             trained_models, test_features1 = self.pretrain(start, end)
             test_features = xgb.DMatrix(test_features1.values)
 
@@ -461,7 +476,9 @@ class PredictLabels():
             print('Predictions complete!')
 
         else:
-            trained_model, test_features = self.train()
+            trained_model, test_features = self._train(
+                train_df, target, start, end, test_df, model
+                )
             predictions = trained_model.predict(test_features)
             
         return predictions
@@ -642,6 +659,7 @@ class DataHandlers():
         new_df['DTC'], new_df['SP'], new_df['BS'] = df[DTC], df[SP], df[BS]
         new_df['BS'], new_df['ROP'] = df[BS], df[ROP]
         new_df['DCAL'], new_df['DRHO'], new_df['MUDWEIGHT'], new_df['RMIC'] = df[DCAL], df[DRHO], df[MUDWEIGHT], df[RMIC]
+        
         if target:
             new_df = df[target]
 
