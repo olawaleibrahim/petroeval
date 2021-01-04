@@ -1,6 +1,43 @@
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_squared_error, r2_score
+
+
+
+def prepare_datasets(df, start, end, target):
+
+    '''
+    The idea is to use the depth column and the range passed by the parameters.
+    The range specified represent the range needed for prediction. Every other part 
+    is used as the training data set
+    '''
+
+    top_df = df.iloc[:df[df['depth'] == start].index[0]]
+    bottom_df = df.iloc[df[df['depth'] == end].index[0]: ]
+    test_features = df.iloc[df[df['depth'] == start].index[0] : df[df['depth'] == end].index[0]]
+
+    top_target = df.iloc[:df[df['depth'] == start].index[0]]
+    bottom_target = df.iloc[df[df['depth'] == end].index[0]: ]
+
+    train_features = pd.concat((top_df, bottom_df), axis=0)
+    train_features = train_features.drop(target, axis=1, inplace=False)
+    test_features = test_features.drop(target, axis=1, inplace=False)
+
+    train_target_df = pd.concat((top_target, bottom_target), axis=0)
+    train_target = train_target_df[target]
+
+    return train_features, test_features, train_target
+
+
+def scale_train_test(train_df, test_df):
+
+    scaler = StandardScaler().fit(train_df)
+    train_df = scaler.transform(train_df)
+    test_df = scaler.transform(test_df)
+
+    return train_df, test_df
+
 
 def drop_columns(data, *args):
 

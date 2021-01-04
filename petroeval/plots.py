@@ -431,7 +431,7 @@ def one_plot(logs, x1, top, base, depth=False):
     logs[x1] = np.log10(logs[x1])
 
 '''
-The function below is adapted and modified from the SEG 2015 tutorials on SEG's
+The functions below are adapted and modified from the SEG 2015 tutorials on SEG's
 github page "The Leading Edge column";
 https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
 '''
@@ -448,9 +448,9 @@ def make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False):
     else:
         logs['Depth'] = logs[Depth]
         Depth = 'Depth'
-        ztop=logs.Depth.max(); zbot=logs.Depth.min()
+        ztop=logs.Depth.min(); zbot=logs.Depth.max()
         
-    logs = logs.sort_values(by='Depth', ascending=False)
+    logs = logs.sort_values(by='Depth', ascending=True)
 
     facies_colors = [
         '#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72','#2E86C1', 
@@ -528,9 +528,9 @@ def compare_plots(logs, x1, x2, x3, x4, x5, Depth=False):
     else:
         logs['Depth'] = logs[Depth]
         Depth = 'Depth'
-        ztop=logs.Depth.max(); zbot=logs.Depth.min()
+        ztop=logs.Depth.min(); zbot=logs.Depth.max()
         
-    logs = logs.sort_values(by='Depth', ascending=False)
+    logs = logs.sort_values(by='Depth', ascending=True)
 
     facies_colors = [
         '#F4D03F', '#F5B041','#DC7633','#6E2C00','#1B4F72','#2E86C1', 

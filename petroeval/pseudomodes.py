@@ -3,7 +3,8 @@ Machine learning module for predicting lithology and lithofacies labels
 and other ML functionalities
 """
 
-from utils import drop_columns, label_encode, one_hot_encode, sample_evaluation, augment_features, check_cardinality
+from utils import prepare_datasets, label_encode, sample_evaluation, scale_train_test
+from utils import augment_features, check_cardinality, drop_columns, one_hot_encode
 from plots import four_plots, make_facies_log_plot, compare_plots
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
@@ -91,27 +92,14 @@ class PredictLitho():
         is used as the training data set
         '''
 
-        top_df = new_df.iloc[:new_df[new_df['depth'] == start].index[0]]
-        bottom_df = new_df.iloc[new_df[new_df['depth'] == end].index[0]: ]
-        test_features = new_df.iloc[new_df[new_df['depth'] == start].index[0] : new_df[new_df['depth'] == end].index[0]]
+        train_features, test_features, train_target = prepare_datasets(new_df, start, end, target)
+        columns = list(test_features.columns)
 
-        top_target = new_df.iloc[:new_df[new_df['depth'] == start].index[0]]
-        bottom_target = new_df.iloc[new_df[new_df['depth'] == end].index[0]: ]
-
-        train_features = pd.concat((top_df, bottom_df), axis=0)
-        train_features = train_features.drop(target, axis=1, inplace=False)
-        test_features = test_features.drop(target, axis=1, inplace=False)
-
-        columns = list(train_features.columns)
-
-        new_df = pd.concat((top_target, bottom_target), axis=0)
-
-        train_target = new_df[target]
+        #train_target = new_df[target]
 
         # scaling train and test features
-        scaler = StandardScaler().fit(train_features)
-        train_features = scaler.transform(train_features)
-        test_features = scaler.transform(test_features)
+
+        train_features, test_features = scale_train_test(train_features, test_features)
 
         train_features = pd.DataFrame(train_features, columns=columns)
         test_features = pd.DataFrame(test_features, columns=columns)
@@ -120,6 +108,7 @@ class PredictLitho():
 
         train_features = train_features.drop('depth', axis=1, inplace=False)
         test_features = test_features.drop('depth', axis=1, inplace=False)
+
 
         return train_features, train_target, test_features
 
@@ -280,7 +269,7 @@ class PredictLabels():
 
 
     def __call__(self, plot=True):
-        return self.train(plot)
+        return self.pretrain(plot)
 
 
     def _preprocess(self, df):
@@ -327,7 +316,7 @@ class PredictLabels():
         return df
 
 
-    def train(self, start, end, pretrained=True):
+    def pretrain(self, start, end, pretrained=True):
 
         '''
         Training method
@@ -344,26 +333,91 @@ class PredictLabels():
 
         self.start = start
         self.end = end
-        self.pretrained = pretrained
-
-        if pretrained:
-
-            models = []
-            i = 0
-            for i in range(1, (len(os.listdir('model')) - 1)):
-                model = xgb.Booster()
-                model.load_model(f'model/lithofacies_model{i}.model')
-                models.append(model)
-
-        else:
-            print('Only pretrained model support is currently available')
+            
+        models = []
+        i = 0
+        for i in range(1, (len(os.listdir('model')) - 1)):
+            model = xgb.Booster()
+            model.load_model(f'model/lithofacies_model{i}.model')
+            models.append(model)
 
         test_features = self._preprocess(self.df)
 
-        return models, test_features   
+        return models, test_features
+
+
+    def prepare(self, train, target, test=None, start=None, end=None):
+
+        self.train, self.test = train, test
+        self.start, self.end = start, end
+        self.target = target
+
+        if test == None:
+
+            try:
+                
+                start/2
+            except TypeError as err:
+                raise err
+
+            except TypeError as err:
+                raise err
+
+            train['depth'] = range(0, train.shape[0])
+                    
+            train_features, test_features, train_target = prepare_datasets(
+                train, start, end, target
+                )
+
+            train_features = train_features.drop('depth', axis=1, inplace=False)
+            test_features = test_features.drop('depth', axis=1, inplace=False)     
+
+        else:
+            
+            df = pd.concat((train, test))
+            label = df[target]
+            ntrain = train.shape[0]
+
+            df = df.drop(target, axis=1, inplace=True)
+            encode_cat_var = DataHandlers(df)
+            df = encode_cat_var.encode_categorical()
+
+            new_train = df[:ntrain]
+            new_test = df[ntrain:]
+            train_target = label[:ntrain]
+
+            train_features, test_features = scale_train_test(new_train, new_test)
+
+        return train_features, test_features, train_target
+
+
+    def train(self, train_df, target, start=None, end=None, test_df=None, model='RF'):
+
+        '''
+        Training method
+        returns: a list of the pretrained model, test features needed for prediction
+
+        args::
+            df: dataframe
+            start: where prediction should start from
+            end: where prediction should stop
+            target: target column to be used for training
+        '''
+
+        self.train_df = train_df
+        self.test_df = test_df
+        self.start = start
+        self.end, self.model = end, model
+        self.target = target
+
+        train_features, test_features, train_target = self.prepare(train_df, test_df, start, end)
+
+        model.fit(train_features, train_target)
+
+        return model, test_features
 
     
-    def predict(self, start, end):
+    def predict(self, start, end, model=False):
 
         '''
         Method used in making prediction
@@ -376,21 +430,28 @@ class PredictLabels():
 
         self.start = start
         self.end = end
+        self.model = model
 
-        trained_models, test_features1 = self.train(start, end)
-        test_features = xgb.DMatrix(test_features1.values)
+        if model == False:
 
-        predictions = np.zeros((test_features1.shape[0], 12))
-        i = 1
-        for model in trained_models:
-            predictions += model.predict(test_features)
-            print(f'Model {i}, predicting...')
-            i += 1
+            trained_models, test_features1 = self.pretrain(start, end)
+            test_features = xgb.DMatrix(test_features1.values)
 
-        predictions = predictions/(len(os.listdir('model')) - 2)
-        predictions = pd.DataFrame(predictions).idxmax(axis=1)
-        print('Predictions complete!')
+            predictions = np.zeros((test_features1.shape[0], 12))
+            i = 1
+            for model in trained_models:
+                predictions += model.predict(test_features)
+                print(f'Model {i}, predicting...')
+                i += 1
 
+            predictions = predictions/(len(os.listdir('model')) - 2)
+            predictions = pd.DataFrame(predictions).idxmax(axis=1)
+            print('Predictions complete!')
+
+        else:
+            trained_model, test_features = self.train()
+            predictions = trained_model.predict(test_features)
+            
         return predictions
 
 
@@ -430,16 +491,10 @@ class PredictLabels():
         self.log1, self.log2, self.log3, self.log4, self.log5 = log1, log2, log3, log4, log5
         self.depth_col = depth_col
 
-        facies_labels = [
-            'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
-            'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
-        ]
         facies_indexes = range(0, len(facies_labels))
         lithofacies_map = dict(zip(facies_indexes, facies_labels))
 
         df['predictions'] = predictions
-        facies = df.predictions.map(lithofacies_map)
-        
         df['Facies'] = predictions
 
         for WELL in df['WELL'].unique():
@@ -458,33 +513,12 @@ class PredictLabels():
         self.label, self.predictions = label, predictions
         self.log1, self.log2, self.log3, self.log4, self.log5 = log1, log2, log3, log4, log5
         self.depth_col = depth_col
-
-        facies_labels = [
-            'Sandstone', 'SS/SH', 'Shale', 'Marl', 'Dolomite',
-            'Limestone', 'Chalk', 'Halite', 'Anhydrite', 'Tuff', 'Coal', 'Basement'
-        ]
-        facies_indexes = range(0, len(facies_labels))
-        lithofacies_map = dict(zip(facies_indexes, facies_labels))
-
-        '''
-        df['predicted_labels'] = predictions
-        #facies = df.predictions.map(lithofacies_map)
         
-        df['Actual'] = label
-        #df['Label'] = df[label]
-        '''
         df['Facies'] = predictions
         df['Actual'] = label
 
         for WELL in df['WELL'].unique():
             
-            '''
-            #new_df = df[df['WELL'] == WELL]
-            compare_plots(
-                df[df['WELL'] == WELL], 'Actual', 'predicted_labels', log1, log2, 
-                log3, log4, log5, Depth=depth_col
-            )
-            '''
             compare_plots(
                 df[df['WELL'] == WELL], log1, log2, log3, log4, log5, Depth=depth_col
                 )
@@ -555,7 +589,7 @@ class DataHandlers():
                       RMED='RMED', RSHA='RSHA', PEF='PEF', DTC='DTC', SP='SP', ROP='ROP', DTS='DTS', 
                       DCAL='DCAL', DRHO='DRHO', MUDWEIGHT='MUDWEIGHT', RMIC='RMIC', ROPA='ROPA', 
                       RXO='RXO', GROUP='GROUP', FORMATION='FORMATION', X_LOC='X_LOC', Y_LOC='Y_LOC', 
-                      Z_LOC='Z_LOC', DEPTH_MD='DEPTH_MD', WELL='WELL', target=None, depth=False):
+                      Z_LOC='Z_LOC', DEPTH_MD='DEPTH_MD', WELL='WELL', target=False, depth=False):
 
         '''
         Method to set well mnemonics
@@ -592,5 +626,7 @@ class DataHandlers():
         new_df['DTC'], new_df['SP'], new_df['BS'] = df[DTC], df[SP], df[BS]
         new_df['BS'], new_df['ROP'] = df[BS], df[ROP]
         new_df['DCAL'], new_df['DRHO'], new_df['MUDWEIGHT'], new_df['RMIC'] = df[DCAL], df[DRHO], df[MUDWEIGHT], df[RMIC]
+        if target:
+            new_df = df[target]
 
         return new_df
