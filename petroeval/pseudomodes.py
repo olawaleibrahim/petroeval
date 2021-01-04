@@ -380,11 +380,23 @@ class PredictLabels():
 
             df = df.drop(target, axis=1, inplace=True)
             encode_cat_var = DataHandlers(df)
-            df = encode_cat_var.encode_categorical()
+            df = encode_cat_var.encode_categorical(target)
 
             new_train = df[:ntrain]
             new_test = df[ntrain:]
+
+            '''
+            Here, the method takes care of the target encoding.
+            If the target is a categorical variable (the lithofacies), it returns the 
+            label encoded form, if it is not, it returns the original form (in numbers) 
+            for easier processing. The encode_categorical function adds _enc to the target
+            encoded column from utils.label_encode function. Hence, reason for the addition
+            of '_enc' below
+            '''
+
             train_target = label[:ntrain]
+            if train[target].dtype == object:
+                train_target = (df[target + '_enc'])[:ntrain]
 
             train_features, test_features = scale_train_test(new_train, new_test)
 
@@ -554,8 +566,12 @@ class DataHandlers():
         based on their cardinality
         
         '''
+        
         self.target = target
         df = self.df
+
+        if df[target].dtype == object:
+            df = label_encode(df, target)
 
         columns = list(df.columns)
 
