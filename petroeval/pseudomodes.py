@@ -545,7 +545,7 @@ class DataHandlers():
         return df
 
 
-    def encode_categorical(self):
+    def encode_categorical(self, target=None):
 
         '''
         Method for encoding categorical variables in a dataframe
@@ -554,7 +554,7 @@ class DataHandlers():
         based on their cardinality
         
         '''
-
+        self.target = target
         df = self.df
 
         columns = list(df.columns)
