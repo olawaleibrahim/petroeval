@@ -1,3 +1,20 @@
+'''
+Utilities modules for other modules
+Contains reusable functions
+
+Functions
+---------
+
+prepare_datasets(df, start, end, target)
+scale_train_test(train_df, test_df)
+drop_columns(data, *args)
+process(df)
+check_cardinality(df, column: str)
+label_encode(df, column)
+one_hot_encode(df, column)
+sample_evaluation(y_test, y_pred)
+'''
+
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
