@@ -21,9 +21,21 @@ import pickle, os
 
 
 class PredictLitho():
-
     '''
-    Class for predicting lithology
+    A Class for predicting well logs lithology
+
+    Methods
+    -------
+    _preprocess(df, target, start, end)
+        returns the processed train and test features and train 
+        targets needed for training the model
+
+    train(target, start, end, plot, model='RF', CV=2)
+        returns the trained lithology model and test features 
+        which predictions will be made on
+    
+    predict(target, start, end, model='RF', CV=2)
+        returns the predicted lithology values (continous values)
     '''
 
     def __init__(self, df, depth_col, plot=True):
@@ -251,9 +263,41 @@ class PredictLitho():
 
     
 class PredictLabels():
-
     '''
     Class for predicting lithofacies
+
+    Methods
+    -------
+    _preprocess(df)
+        returns the preprocessed dataframe (
+            takes care of encoding, missing values, 
+            well data augmentation
+        )
+    pretrain()
+        returns a list of the pretrained lithofacies models,
+        and preprocessed test dataframe to be predicted on
+
+    prepare(train, target, test=None, start=None, end=None)
+        returns the train features, test features and train targets
+        need for training the lithofacies model and making predictions
+
+    _train(train_df, target, start=None, end=None, test_df=None, model='RF')
+        returns the trained lithofacies model and test features needed 
+        for predictions
+
+    predict(test_df=None, target=None, model=False)
+        returns the test data predicted lithofacies
+
+    plot_feat_imp(model, columns)
+        plots of a bar chart the features importance after model training
+
+    plot_lithofacies(df, predictions, log1, log2, log3, log4, log5, depth_col)
+        makes plots and colorplot of the well logs and predicted
+        lithofacies respectively
+
+    compare_lithofacies(df, label, predictions, log1, log2, log3, log4, log5, depth_col)
+        makes plots and colorplots of the well logs and predicted and 
+        actual lithofacies respectively
     '''
 
     def __init__(self, df, depth_col=None, plot=True):
@@ -563,16 +607,28 @@ class PredictLabels():
 
 
     def plot_lithofacies(
-        self, df, predictions, log1, log2, log3, log4, log5, depth_col
+        self, df, predictions, log1: str, log2: str, log3: str, log4: str, log5: str, depth_col: str
     ):
+
+        '''
+        Plots well logs against depth and corresponding predicted lithofacies
+        in a labelled color plot
+
+        Arguments
+        ---------
+
+        df: dataframe of well data
+        predictions: predicted values in integers (0, 1, 2....)
+        log1: str -> well log 1
+        ''''''''''''''''''''
+        log5: str -> well log 2
+        depth_col: depth column
+        '''
 
         self.df = df
         self.predictions = predictions
         self.log1, self.log2, self.log3, self.log4, self.log5 = log1, log2, log3, log4, log5
         self.depth_col = depth_col
-
-        #facies_indexes = range(0, len(facies_labels))
-        #lithofacies_map = dict(zip(facies_indexes, facies_labels))
 
         df['predictions'] = predictions
         df['Facies'] = predictions
@@ -588,6 +644,22 @@ class PredictLabels():
     def compare_lithofacies(
         self, df, label, predictions, log1, log2, log3, log4, log5, depth_col
     ):
+
+        '''
+        Plots well logs against depth and corresponding predicted and actual 
+        lithofacies in a labelled color plot for comparism
+
+        Arguments
+        ---------
+
+        df: dataframe of well data
+        label: actual lithofacies values
+        predictions: predicted values in integers (0, 1, 2....)
+        log1: str -> well log 1
+        ''''''''''''''''''''
+        log5: str -> well log 2
+        depth_col: depth column
+        '''
 
         self.df = df
         self.label, self.predictions = label, predictions
@@ -605,18 +677,40 @@ class PredictLabels():
 
 
 class DataHandlers():
-
     '''
     Handle the preprocessing of the dataframe for categorical and numerical variables
     as well as handling different mnemonics issues.
-    args::
+    
+    Methods
+    --------
+    encode_categorical()
+        returns dataframe with categorical variables encoded or 
+        dropped based on the degree of cardinality of each 
+        categorical column. Encoding could be (label encoding
+        or one hot encoding). Categorical columns with low cardinality
+        are one hot encoded while those with medium to high cardinality
+        are label encoded while columns with extremely high cardinalities 
+        (tending to be unique columns), are dropped
+
+    set_mnemonics(GR='GR', RHOB='RHOB', NPHI='NPHI', CALI='CALI', BS='BS', RDEP='RDEP',
+                      RMED='RMED', RSHA='RSHA', PEF='PEF', DTC='DTC', SP='SP', ROP='ROP', DTS='DTS', 
+                      DCAL='DCAL', DRHO='DRHO', MUDWEIGHT='MUDWEIGHT', RMIC='RMIC', ROPA='ROPA', 
+                      RXO='RXO', GROUP='GROUP', FORMATION='FORMATION', X_LOC='X_LOC', Y_LOC='Y_LOC', 
+                      Z_LOC='Z_LOC', DEPTH_MD='DEPTH_MD', WELL='WELL', depth=False)
+
+        returns dataframe with log headers corrected/adjusted in arguments
+    '''
+
+    def __init__(self, df, target=None):
+
+        '''
+        Arguments
+        ------------
         df: dataframe
         target: target column name (string)
                 target column is label encoded if present as string
                 returns the target as received if in int or float
-    '''
-
-    def __init__(self, df, target=None):
+        '''
 
         self.df = df
         self.target = target
