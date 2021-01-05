@@ -261,7 +261,9 @@ class PredictLabels():
         '''
         args::
             df: dataframe for predicting lithofacies
-            depth_col: depth column if available, specify False if not
+            depth_col: specify column name if prediction should be based on that depth,
+                        leave as default (None), if dataframe index should be used or
+                        if depth column is not available
             plot: to return the feature importance plot after model training
         '''
 
@@ -384,7 +386,12 @@ class PredictLabels():
             if type(self.depth_col) == type(None):
                 train['depth'] = range(0, train.shape[0])
             else:
-                train['depth'] = train[self.depth_col]
+                # converting the depths to integers, for easier slicing operation when preparing data
+                depths = list(train[self.depth_col])
+                depths_ = []
+                for depth in depths:
+                    depths_.append(int(depth))
+                train['depth'] = depths_
 
             encode_cat_var = DataHandlers(df=train, target=target)
             train = encode_cat_var.encode_categorical()
@@ -604,6 +611,9 @@ class DataHandlers():
     as well as handling different mnemonics issues.
     args::
         df: dataframe
+        target: target column name (string)
+                target column is label encoded if present as string
+                returns the target as received if in int or float
     '''
 
     def __init__(self, df, target=None):
