@@ -32,6 +32,7 @@ class PredictLitho():
         args::
             df: dataframe
             depth_col: depth column, specify False if absent
+            plot: to return the feature importance plot after model training
         '''
 
         self.df = df
@@ -39,6 +40,10 @@ class PredictLitho():
         self.plot = plot
 
     def __call__(self, plot=True):
+
+        '''
+        returns the train method when the class is called
+        '''
         return self.train(plot)
 
     
@@ -50,6 +55,7 @@ class PredictLitho():
         portion of the data needed for predictions (test features). This is done in
         a way to prevent data leakage while still using the maximum data points
         for a better accuracy
+
         returns: train features, train target, test features
 
         args::
@@ -121,6 +127,7 @@ class PredictLitho():
             model: model to be used; default value is 'RF' for random forest
                                      other options are 'XG' for XGBoost
                                                        'LGB' for LightGBM
+            CV: number of cross validation folds to run (currently not implemented)
         '''
 
         self.model = model
@@ -198,6 +205,7 @@ class PredictLitho():
             model: model to be used; default value is 'RF' for random forest
                                      other options are 'XG' for XGBoost
                                                        'CAT' for CatBoost
+            CV: number of cross validation folds to run (currently not implemented)
                                                        
         '''
 
@@ -248,12 +256,13 @@ class PredictLabels():
     Class for predicting lithofacies
     '''
 
-    def __init__(self, df, depth_col, plot=True):
+    def __init__(self, df, depth_col=None, plot=True):
 
         '''
         args::
             df: dataframe for predicting lithofacies
             depth_col: depth column if available, specify False if not
+            plot: to return the feature importance plot after model training
         '''
 
         self.df = df
@@ -262,6 +271,11 @@ class PredictLabels():
 
 
     def __call__(self, plot=True):
+
+        '''
+        returns the train method when the class is called
+        '''
+
         return self.pretrain(plot)
 
 
@@ -270,6 +284,7 @@ class PredictLabels():
         '''
         Preprocessing method: Takes care of missing values, encoding categorical features
                               augmenting features
+
         returns: preprocessed dataframe
 
         args::
@@ -309,23 +324,13 @@ class PredictLabels():
         return df
 
 
-    def pretrain(self, start, end, pretrained=True):
+    def pretrain(self):
 
         '''
         Training method
         returns: a list of the pretrained models, test features needed for prediction
 
-        args::
-            start: where prediction should start from
-            end: where prediction should stop
-            pretrained: takes in boolean values; 
-                        True if pretrained models should be used
-                        False if model should be trained from scratch
-
         '''
-
-        self.start = start
-        self.end = end
             
         models = []
         i = 0
@@ -341,11 +346,31 @@ class PredictLabels():
 
     def prepare(self, train, target, test=None, start=None, end=None):
 
+        '''
+        Method to prepare dataset(s) for training
+
+        returns: train data features, test data features, train target
+
+        args::
+            train: train data
+            target: target column string name
+            test: test dataframe if test features is in a different dataframe
+            start: specify start point for test features from train data if test features
+                    dataframe does not exist i.e if desired prediction section is a missing
+                    section from the supplied train data
+            end: where test features should stop from train data provided
+        '''
+
         self.train, self.test = train, test
         self.start, self.end = start, end
         self.target = target
 
         if type(test) == type(None):
+
+            '''
+            that is: if test data frame is not specified but will be created
+            from train data provided
+            '''
 
             try:
                 
@@ -356,7 +381,10 @@ class PredictLabels():
             except TypeError as err:
                 raise err
 
-            train['depth'] = range(0, train.shape[0])
+            if type(self.depth_col) == type(None):
+                train['depth'] = range(0, train.shape[0])
+            else:
+                train['depth'] = train[self.depth_col]
 
             encode_cat_var = DataHandlers(df=train, target=target)
             train = encode_cat_var.encode_categorical()
@@ -365,12 +393,15 @@ class PredictLabels():
                 train, start, end, target
                 )
 
+            # dropping added depth column which was used to aid preprocessing
             train_features = train_features.drop('depth', axis=1, inplace=False)
             test_features = test_features.drop('depth', axis=1, inplace=False)  
             train_features = train_features.fillna(-9999, inplace=False)
             test_features = test_features.fillna(-9999, inplace=False)
 
         else:
+
+            # if test data frame is specified
             
             df = pd.concat((train, test))
             
@@ -412,13 +443,15 @@ class PredictLabels():
 
         '''
         Training method
-        returns: a list of the pretrained model, test features needed for prediction
+        returns: trained model, test features needed for prediction
 
         args::
-            df: dataframe
+            train_df: train dataframe
             start: where prediction should start from
             end: where prediction should stop
-            target: target column to be used for training
+            target: target column to be used for training (string/column name)
+            model: model to be used; default value is 'RF' for random forest
+                                     other options are 'XG' for XGBoost
         '''
 
         self.train_df = train_df
@@ -447,30 +480,31 @@ class PredictLabels():
                 n_estimators=100, max_depth=10, learning_rate=0.1,
                 reg_lambda=300, random_state=20, tree_method='gpu_hist'
                 )
-                
+
             model1.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_test, y_test)], verbose=10)
             print('Model training completed...')
 
         return model1, test_features
 
     
-    def predict(self, train_df=None, test_df=None, target=None, start=None, end=None, model=False):
+    def predict(self, test_df=None, target=None, model=False):
 
         '''
         Method used in making prediction
         returns: prediction values
 
         args::
-            start: where prediction should start from
-            end: where prediction should stop
+            test_df: test dataframe if test features is in a different dataframe
+            model: default value is false (pretraioned model is used for prediction), 
+                    trained model object should be specified if available;
+                    if not, the model is trained based on other arguments passed
         '''
 
-        self.start, self.end = start, end
-        self.train_df, self.test_df = train_df, test_df
-        self.model, self.target = model, target
+        self.test_df = test_df
+        self.model = model
 
         if model == False:
-            trained_models, test_features1 = self.pretrain(start, end)
+            trained_models, test_features1 = self.pretrain()
             test_features = xgb.DMatrix(test_features1.values)
 
             predictions = np.zeros((test_features1.shape[0], 12))
@@ -486,12 +520,7 @@ class PredictLabels():
 
         else:
 
-            '''
-            trained_model, test_features = self._train(
-                train_df, target, start, end, test_df, model
-                )
-            predictions = trained_model.predict(test_features)
-            '''
+            # that is if nodel is specified, predictions should be made on the test data
 
             predictions = model.predict(test_df)
             print(predictions)
