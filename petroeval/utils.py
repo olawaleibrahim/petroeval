@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 
 
-
 def prepare_datasets(df, start, end, target):
 
     '''
@@ -58,6 +57,7 @@ def drop_columns(data, *args):
         
     return data
 
+
 def process(df):
 
     '''
@@ -77,6 +77,7 @@ def process(df):
         df.loc[df[_] == -np.inf] = 0
         
     return df
+
 
 def check_cardinality(df, column):
 
@@ -100,6 +101,7 @@ def check_cardinality(df, column):
 
     return value
 
+
 def label_encode(df, column):
 
     df[column + '_enc'] = df[column].astype('category')
@@ -108,16 +110,19 @@ def label_encode(df, column):
 
     return df
 
+
 def one_hot_encode(df, column):
 
     df = pd.get_dummies(df, prefix=column, columns=[column])
 
     return df
 
+
 def sample_evaluation(y_test, y_pred):
     
     print(f'The test RMSE is : {mean_squared_error(y_test, y_pred) ** 0.5}')
     print(f'The test R2 score is : {r2_score(y_test, y_pred)}')
+
 
 #Paolo Bestagini's feature augmentation technique from SEG 2016 ML competition
 #Link : https://github.com/seg/2016-ml-contest/tree/master/ispl
@@ -142,6 +147,7 @@ def augment_features_window(X, N_neig):
  
     return X_aug
  
+
 # Feature gradient computation function
 def augment_features_gradient(X, depth):
     
@@ -156,6 +162,7 @@ def augment_features_gradient(X, depth):
     
     return X_grad
  
+
 # Feature augmentation function
 def augment_features(X, well, depth, N_neig=1):
     

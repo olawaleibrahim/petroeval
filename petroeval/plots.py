@@ -596,5 +596,5 @@ def compare_plots(logs, x1, x2, x3, x4, x5, Depth=False):
     
     ax[1].set_yticklabels([]); ax[2].set_yticklabels([]); ax[3].set_yticklabels([])
     ax[4].set_yticklabels([]); ax[5].set_yticklabels([]); ax[6].set_yticklabels([])
-    ax[6].set_xticklabels([]); 
+    ax[5].set_xticklabels([]); ax[6].set_xticklabels([]); 
     f.suptitle('Well: %s'%logs.iloc[0]['WELL'], fontsize=14,y=0.94)

@@ -77,11 +77,10 @@ class PredictLitho():
                 new_df.drop(column, axis=1, inplace=True)
         '''
 
-        encoding = DataHandlers(new_df)
+        encoding = DataHandlers(df=new_df, target=target)
         new_df = encoding.encode_categorical()
 
         new_df['depth'] = range(0, new_df.shape[0])
-
 
         # divide dataframe into train part and part needed for prediction
 
@@ -94,8 +93,6 @@ class PredictLitho():
         train_features, test_features, train_target = prepare_datasets(new_df, start, end, target)
         columns = list(test_features.columns)
 
-        #train_target = new_df[target]
-
         # scaling train and test features
 
         train_features, test_features = scale_train_test(train_features, test_features)
@@ -107,7 +104,6 @@ class PredictLitho():
 
         train_features = train_features.drop('depth', axis=1, inplace=False)
         test_features = test_features.drop('depth', axis=1, inplace=False)
-
 
         return train_features, train_target, test_features
 
@@ -135,14 +131,13 @@ class PredictLitho():
         df = self.df
 
         try:
-            if CV < 3:
+            if CV < 2:
                 raise ValueError(f'Number of cross validation folds should be greater than 2; {CV} specified')
             
         except ValueError as err:
             print(err)
 
         train_features, train_target, test_features = self._preprocess(df, target, start, end)
-
 
         '''
         Divide dataframe into train part and part needed for prediction:
@@ -164,7 +159,6 @@ class PredictLitho():
 
         elif model == 'LGB':
             model1 = lgb.LGBMRegressor(n_estimators=3000, max_depth=6, reg_lambda=300, random_state=20)
-
         
         if model == 'RF':
             model1.fit(X_train, y_train)
@@ -351,7 +345,7 @@ class PredictLabels():
         self.start, self.end = start, end
         self.target = target
 
-        if test == None:
+        if type(test) == type(None):
 
             try:
                 
@@ -363,23 +357,28 @@ class PredictLabels():
                 raise err
 
             train['depth'] = range(0, train.shape[0])
+
+            encode_cat_var = DataHandlers(df=train, target=target)
+            train = encode_cat_var.encode_categorical()
                     
             train_features, test_features, train_target = prepare_datasets(
                 train, start, end, target
                 )
 
             train_features = train_features.drop('depth', axis=1, inplace=False)
-            test_features = test_features.drop('depth', axis=1, inplace=False)     
+            test_features = test_features.drop('depth', axis=1, inplace=False)  
+            train_features = train_features.fillna(-9999, inplace=False)
+            test_features = test_features.fillna(-9999, inplace=False)
 
         else:
             
             df = pd.concat((train, test))
+            
             label = df[target]
             ntrain = train.shape[0]
-
-            df = df.drop(target, axis=1, inplace=True)
-            encode_cat_var = DataHandlers(df)
-            df = encode_cat_var.encode_categorical(target)
+            
+            encode_cat_var = DataHandlers(df=df, target=target)
+            df = encode_cat_var.encode_categorical()
 
             new_train = df[:ntrain]
             new_test = df[ntrain:]
@@ -394,10 +393,17 @@ class PredictLabels():
             '''
 
             train_target = label[:ntrain]
+
             if train[target].dtype == object:
                 train_target = (df[target + '_enc'])[:ntrain]
 
+            columns = new_train.columns
             train_features, test_features = scale_train_test(new_train, new_test)
+
+            train_features = pd.DataFrame(train_features, columns=columns)
+            test_features = pd.DataFrame(test_features, columns=columns)
+            train_features = train_features.fillna(-9999, inplace=False)
+            test_features = test_features.fillna(-9999, inplace=False)
 
         return train_features, test_features, train_target
 
@@ -421,27 +427,30 @@ class PredictLabels():
         self.end, self.model = end, model
         self.target = target
 
-        train_features, test_features, train_target = self.prepare(train_df, test_df, start, end)
+        train_features, test_features, train_target = self.prepare(
+            train=train_df, test=test_df, target=target, start=start, end=end
+            )
 
         if model == 'RF':
             model1 = RandomForestClassifier(
-                                            n_estimators=250, max_depth=10, 
-                                            class_weight='balanced', verbose=2, 
-                                            random_state=20
+                n_estimators=100, class_weight='balanced', verbose=2, random_state=20
                                             )
             model1.fit(train_features, train_target)
+            print('Model training completed...')
         
         elif model == 'XGB':
-
             X_train, X_test, y_train, y_test = ms.train_test_split(
-                train_features, test_features, test_size=0.2, stratify=train_target
+                train_features, train_target, test_size=0.2, stratify=train_target
             )
+
             model1 = xgb.XGBClassifier(
-                                       n_estimators=5000, max_depth=10, 
-                                       reg_lambda=300, random_state=20, tree_method='gpu_hist'
-                                       )
-            model1.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=100)
-            
+                n_estimators=100, max_depth=10, learning_rate=0.1,
+                reg_lambda=300, random_state=20, tree_method='gpu_hist'
+                )
+                
+            model1.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_test, y_test)], verbose=10)
+            print('Model training completed...')
+
         return model1, test_features
 
     
@@ -476,10 +485,16 @@ class PredictLabels():
             print('Predictions complete!')
 
         else:
+
+            '''
             trained_model, test_features = self._train(
                 train_df, target, start, end, test_df, model
                 )
             predictions = trained_model.predict(test_features)
+            '''
+
+            predictions = model.predict(test_df)
+            print(predictions)
             
         return predictions
 
@@ -520,8 +535,8 @@ class PredictLabels():
         self.log1, self.log2, self.log3, self.log4, self.log5 = log1, log2, log3, log4, log5
         self.depth_col = depth_col
 
-        facies_indexes = range(0, len(facies_labels))
-        lithofacies_map = dict(zip(facies_indexes, facies_labels))
+        #facies_indexes = range(0, len(facies_labels))
+        #lithofacies_map = dict(zip(facies_indexes, facies_labels))
 
         df['predictions'] = predictions
         df['Facies'] = predictions
@@ -562,9 +577,10 @@ class DataHandlers():
         df: dataframe
     '''
 
-    def __init__(self, df):
+    def __init__(self, df, target=None):
 
         self.df = df
+        self.target = target
 
     
     def __call__(self):
@@ -574,7 +590,7 @@ class DataHandlers():
         return df
 
 
-    def encode_categorical(self, target=None):
+    def encode_categorical(self):
 
         '''
         Method for encoding categorical variables in a dataframe
@@ -584,10 +600,13 @@ class DataHandlers():
         
         '''
         
-        self.target = target
+        target = self.target
         df = self.df
 
-        if df[target].dtype == object:
+        if type(target) == type(None):
+            pass
+            
+        elif df[target].dtype == object:
             df = label_encode(df, target)
 
         columns = list(df.columns)
@@ -600,7 +619,9 @@ class DataHandlers():
 
         # check cardinality of categorical variables then encode based on cardinality
 
+        previous_cat_columns = []
         for column in cat_df.columns:
+            previous_cat_columns.append(column)
 
             # if cardinality is too high/feature is distinct (e.g. a unique ID column), the column will be dropped
             if check_cardinality(cat_df, column) == 'Unique' or check_cardinality(cat_df, column) == 'Distinct':
@@ -612,7 +633,7 @@ class DataHandlers():
             elif check_cardinality(cat_df, column) == 'Low':
                 cat_df = one_hot_encode(cat_df, column)
 
-        df = df.drop(cat_df.columns, axis=1, inplace=False)
+        df = df.drop(previous_cat_columns, axis=1, inplace=False)
         df = pd.concat((df, cat_df), axis=1)
 
         return df
@@ -622,7 +643,7 @@ class DataHandlers():
                       RMED='RMED', RSHA='RSHA', PEF='PEF', DTC='DTC', SP='SP', ROP='ROP', DTS='DTS', 
                       DCAL='DCAL', DRHO='DRHO', MUDWEIGHT='MUDWEIGHT', RMIC='RMIC', ROPA='ROPA', 
                       RXO='RXO', GROUP='GROUP', FORMATION='FORMATION', X_LOC='X_LOC', Y_LOC='Y_LOC', 
-                      Z_LOC='Z_LOC', DEPTH_MD='DEPTH_MD', WELL='WELL', target=False, depth=False):
+                      Z_LOC='Z_LOC', DEPTH_MD='DEPTH_MD', WELL='WELL', depth=False):
 
         '''
         Method to set well mnemonics
@@ -641,7 +662,8 @@ class DataHandlers():
         self.RMED, self.RSHA, self.PEF, self.DTC, self.SP, self.ROP, self.DTS = RMED, RSHA, PEF, DTC, SP, ROP, DTS
         self.DCAL, self.DRHO, self.MUDWEIGHT, self.RMIC, self.ROPA = DCAL, DRHO, MUDWEIGHT, RMIC, ROPA
         self.RXO, self.GROUP, self.FORMATION, self.X_LOC, self.Y_LOC, self.Z_LOC = RXO, GROUP, FORMATION, X_LOC, Y_LOC, Z_LOC
-        self.depth, self.DEPTH_MD, self.target, self.WELL, df = depth, DEPTH_MD, target, WELL, self.df
+        self.depth, self.DEPTH_MD, self.WELL, df = depth, DEPTH_MD, WELL, self.df
+        target = self.target
 
         if depth == False:
             df['depth'] = df.index
@@ -661,6 +683,6 @@ class DataHandlers():
         new_df['DCAL'], new_df['DRHO'], new_df['MUDWEIGHT'], new_df['RMIC'] = df[DCAL], df[DRHO], df[MUDWEIGHT], df[RMIC]
         
         if target:
-            new_df = df[target]
+            new_df[target] = df[target]
 
         return new_df
