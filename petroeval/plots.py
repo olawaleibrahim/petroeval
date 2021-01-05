@@ -9,7 +9,6 @@ warnings.filterwarnings('ignore')
 
 
 def four_plot(logs, top, base, depth=False):
-    
     '''
     Function to automatically plot well logs
     Returns a plot of four logs(Gamma ray, Porosity, Density and Resistivity)
@@ -70,7 +69,6 @@ def four_plot(logs, top, base, depth=False):
         print(f'Depth column could not be located. {err}')
 
 def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
-
     '''
     Function to automatically plot well logs
     Returns a plot of three logs(x1, x2, x3)
@@ -141,7 +139,6 @@ def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
         print(f'Depth column could not be located. {err}')
 
 def three_plots(logs, x1, x2, x3, top, base, depth=False):
-
     '''
     Function to automatically plot well logs
     Returns a plot of three logs(x1, x2, x3)
@@ -207,7 +204,6 @@ def three_plots(logs, x1, x2, x3, top, base, depth=False):
 
 
 def two_plots(logs, x1, x2, top, base, depth=False):
-
     '''
     Function to automatically plot well logs
     Returns a plot of two logs(x1, x2)
@@ -265,7 +261,6 @@ def two_plots(logs, x1, x2, top, base, depth=False):
         
         
 def two_plot(logs, x1, x2, top, base, depth=False, scale=False):
-
     '''
     Function to automatically plot well logs
     Returns a plot of two logs(x1, x2)
@@ -381,7 +376,6 @@ def two_plot(logs, x1, x2, top, base, depth=False, scale=False):
 
 
 def one_plot(logs, x1, top, base, depth=False):
-
     '''
     Function to automatically plot a single well log
     args::
@@ -437,7 +431,20 @@ https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
 '''
 
 def make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False):
-    #make sure logs are sorted by depth
+    '''
+    Plots well logs against depth and corresponding predicted lithofacies
+        in a labelled color plot
+
+        Arguments
+        ---------
+
+        df: dataframe of well data
+        predictions: predicted values in integers (0, 1, 2....)
+        log1: str -> well log 1
+        ''''''''''''''''''''
+        log5: str -> well log 2
+        depth_col: depth column
+    '''
 
     logs = logs.fillna(0)
     if Depth == False:
@@ -517,7 +524,21 @@ def make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False):
 
 
 def compare_plots(logs, x1, x2, x3, x4, x5, Depth=False):
-    #make sure logs are sorted by depth
+    '''
+    Plots well logs against depth and corresponding predicted and actual 
+    lithofacies in a labelled color plot for comparism
+
+    Arguments
+    ---------
+
+    df: dataframe of well data
+    label: actual lithofacies values
+    predictions: predicted values in integers (0, 1, 2....)
+    log1: str -> well log 1
+    ''''''''''''''''''''
+    log5: str -> well log 2
+    depth_col: depth column
+    '''
 
     logs = logs.fillna(0)
     if Depth == False:

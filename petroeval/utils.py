@@ -5,9 +5,21 @@ import numpy as np
 
 
 def prepare_datasets(df, start, end, target):
-
     '''
-    The idea is to use the depth column and the range passed by the parameters.
+    Function to prepare the dataframe into train and test features
+
+    returns: train features, test features, train target
+
+    Arguments
+    ---------
+
+    target: target column string name
+            start: specify start point for test features from train data if test features
+                    dataframe does not exist i.e if desired prediction section is a missing
+                    section from the supplied train data
+            end: where test features should stop from train data provided
+
+    The general idea is to use the depth column and the range passed by the parameters.
     The range specified represent the range needed for prediction. Every other part 
     is used as the training data set
     '''
@@ -30,6 +42,16 @@ def prepare_datasets(df, start, end, target):
 
 
 def scale_train_test(train_df, test_df):
+    '''
+    Function to scale train and test data sets
+
+    returns: scaled train and test data
+
+    Arguments
+    ---------
+    train_df: train dataframe or first dataframe or data
+    test_df: test dataframe or secind dataframe or data
+    '''
 
     scaler = StandardScaler().fit(train_df)
     train_df = scaler.transform(train_df)
@@ -41,12 +63,14 @@ def scale_train_test(train_df, test_df):
 def drop_columns(data, *args):
 
     '''
-    function used to drop columns.
-    args:: 
+    function used to drop columns
+
+    returns: dataframe wkth dropped column(s)
+
+    Arguments
+    ---------
       data:  dataframe to be operated on
       *args: a list of columns to be dropped from the dataframe
-
-    return: returns a dataframe with the columns dropped
     '''
     
     columns = []
@@ -63,6 +87,12 @@ def process(df):
     '''
     Function to process log and replace missing or infinity values with zero
     for easier plotting
+
+    returns: dataframe with substituted and processed values
+
+    Arguments
+    ---------
+    df = dataframe to be processed
     '''
 
     cols = list(df.columns)
@@ -79,7 +109,18 @@ def process(df):
     return df
 
 
-def check_cardinality(df, column):
+def check_cardinality(df, column: str):
+    '''
+    Function to check the cardinality of a column
+    
+    returns a value (string) based on deduced column cardinality
+
+    Arguments
+    ---------
+
+    df: dataframe
+    column: column in dataframe to check cardinality
+    '''
 
     no_rows = df.shape[0]
     value_count = df[column].value_counts()
@@ -103,6 +144,18 @@ def check_cardinality(df, column):
 
 
 def label_encode(df, column):
+    '''
+    Function to label encode a categorical column
+
+    returns: column is dropped and dataframe with the encoded column
+
+    Arguments
+    ---------
+
+    df: dataframe
+    column: column in dataframe to check cardinality
+    '''
+            
 
     df[column + '_enc'] = df[column].astype('category')
     df[column + '_enc'] = df[column + '_enc'].cat.codes
@@ -112,6 +165,17 @@ def label_encode(df, column):
 
 
 def one_hot_encode(df, column):
+    '''
+    Function to one hot encode a categorical column
+
+    returns: column is dropped and dataframe with the encoded column
+
+    Arguments
+    ---------
+
+    df: dataframe
+    column: column in dataframe to check cardinality
+    '''
 
     df = pd.get_dummies(df, prefix=column, columns=[column])
 
@@ -119,6 +183,14 @@ def one_hot_encode(df, column):
 
 
 def sample_evaluation(y_test, y_pred):
+    '''
+    Function to print the RMSE and R2 of the predicted and actual values
+
+    Arguments
+    ---------
+    y_test: actual values
+    y_pred: predictions
+    '''
     
     print(f'The test RMSE is : {mean_squared_error(y_test, y_pred) ** 0.5}')
     print(f'The test R2 score is : {r2_score(y_test, y_pred)}')
