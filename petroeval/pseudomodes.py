@@ -31,7 +31,7 @@ class PredictLitho():
         '''
         args::
             df: dataframe
-            depth_col: depth column, specify False if absent
+            depth_col: depth column, specify False if absent,
             plot: to return the feature importance plot after model training
         '''
 
