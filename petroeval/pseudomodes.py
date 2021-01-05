@@ -1,6 +1,22 @@
 """
 Machine learning module for predicting lithology and lithofacies labels
 and other ML functionalities
+
+Classes
+-------
+
+PredictLitho()
+    class for predicting well lithology values by estimating values
+    from same well but different log data
+
+PredictLabels()
+    class for predicting lithofacies from well logs
+
+DataHandlers()
+    class for handling differences in log headers,
+    encoding data, and setting log mnemonics to a common 
+    standard for easier well data use by the ML classes
+    defined above
 """
 
 from utils import prepare_datasets, label_encode, sample_evaluation, scale_train_test
