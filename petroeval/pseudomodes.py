@@ -84,9 +84,12 @@ class PredictLitho():
         a way to prevent data leakage while still using the maximum data points
         for a better accuracy
 
-        returns: train features, train target, test features
+        Returns
+        -------
+        Train features, train target, test features
 
-        args::
+        Arguments
+        ---------
             df: dataframe to be preprocessed
             target: column to be predicted
             start: where prediction should start from
@@ -146,9 +149,12 @@ class PredictLitho():
 
         '''
         Method used in making prediction
-        returns: trained model, test features needed for predictions
+        Returns
+        -------
+        Trained model, test features needed for predictions
 
-        args::
+        Arguments
+        ---------
             target: Column to be predicted
             start: where prediction should start from
             end: where prediction should stop
@@ -224,9 +230,12 @@ class PredictLitho():
 
         '''
         Method used in making prediction
-        returns: prediction values
+        Returns
+        -------
+        Prediction values
 
-        args::
+        Arguments
+        ---------
             target: Column to be predicted
             start: where prediction should start from
             end: where prediction should stop
@@ -347,9 +356,12 @@ class PredictLabels():
         Preprocessing method: Takes care of missing values, encoding categorical features
                               augmenting features
 
-        returns: preprocessed dataframe
+        Returns
+        -------
+        Preprocessed dataframe
 
-        args::
+        Arguments
+        ---------
             df: dataframe to be preprocessed
         '''
         
@@ -390,7 +402,10 @@ class PredictLabels():
 
         '''
         Training method
-        returns: a list of the pretrained models, test features needed for prediction
+        
+        Returns
+        -------
+        A list of the pretrained models, test features needed for prediction
 
         '''
             
@@ -411,9 +426,12 @@ class PredictLabels():
         '''
         Method to prepare dataset(s) for training
 
-        returns: train data features, test data features, train target
+        Returns
+        -------
+        Train data features, test data features, train target
 
-        args::
+        Arguments
+        ---------
             train: train data
             target: target column string name
             test: test dataframe if test features is in a different dataframe
@@ -510,9 +528,12 @@ class PredictLabels():
 
         '''
         Training method
-        returns: trained model, test features needed for prediction
+        Returns
+        -------
+        Trained model, test features needed for prediction
 
-        args::
+        Arguments
+        ---------
             train_df: train dataframe
             start: where prediction should start from
             end: where prediction should stop
@@ -558,9 +579,12 @@ class PredictLabels():
 
         '''
         Method used in making prediction
-        returns: prediction values
+        Returns
+        -------
+        Prediction values
 
-        args::
+        Arguments
+        ---------
             test_df: test dataframe if test features is in a different dataframe
             model: default value is false (pretraioned model is used for prediction), 
                     trained model object should be specified if available;
@@ -700,9 +724,13 @@ class DataHandlers():
     Methods
     --------
     encode_categorical()
-        returns dataframe with categorical variables encoded or 
+        Returns
+        -------
+        Dataframe with categorical variables encoded or 
         dropped based on the degree of cardinality of each 
-        categorical column. Encoding could be (label encoding
+        categorical column. 
+        
+        Encoding could be (label encoding
         or one hot encoding). Categorical columns with low cardinality
         are one hot encoded while those with medium to high cardinality
         are label encoded while columns with extremely high cardinalities 
@@ -744,7 +772,9 @@ class DataHandlers():
         '''
         Method for encoding categorical variables in a dataframe
 
-        returns: dataframe with the categorical variables encoded
+        Returns
+        -------
+        Dataframe with the categorical variables encoded
         based on their cardinality
         
         '''
@@ -799,8 +829,12 @@ class DataHandlers():
         This preprocessing is necessary to have the data in the right format for prediction
         by the pretrained model
 
-        returns: dataframe with 24 log types (the arguments passed)
-        args::
+        Returns
+        -------
+        Dataframe with 24 log types (the arguments passed)
+        
+        Arguments
+        ---------
             Well curves. Default mnemonics are used. Specify the curve value in 
             cases of different value. Specify False if curve does not appear in
             the data/well.

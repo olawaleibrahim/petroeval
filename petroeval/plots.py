@@ -1,3 +1,25 @@
+'''
+Module for log displays and visualizations
+
+Functions
+
+four_plot(logs, top, base, depth=False)
+
+four_plots(logs, x1, x2, x3, x4, top, base, depth=False)
+
+three_plots(logs, x1, x2, x3, top, base, depth=False)
+
+two_plots(logs, x1, x2, top, base, depth=False)
+
+two_plot(logs, x1, x2, top, base, depth=False, scale=False)
+
+one_plot(logs, x1, top, base, depth=False)
+
+make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False)
+
+compare_plots(logs, x1, x2, x3, x4, x5, Depth=False)
+'''
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
@@ -433,13 +455,12 @@ https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
 def make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False):
     '''
     Plots well logs against depth and corresponding predicted lithofacies
-        in a labelled color plot
+    in a labelled color plot
 
         Arguments
         ---------
 
-        df: dataframe of well data
-        predictions: predicted values in integers (0, 1, 2....)
+        logs: dataframe with predicted values column as "Facies"
         log1: str -> well log 1
         ''''''''''''''''''''
         log5: str -> well log 2
@@ -531,9 +552,8 @@ def compare_plots(logs, x1, x2, x3, x4, x5, Depth=False):
     Arguments
     ---------
 
-    df: dataframe of well data
-    label: actual lithofacies values
-    predictions: predicted values in integers (0, 1, 2....)
+    df: dataframe of well data with actual lithofacies as "Actual"
+        and predicted lithofacies as "Facies"
     log1: str -> well log 1
     ''''''''''''''''''''
     log5: str -> well log 2

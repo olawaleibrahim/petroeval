@@ -1,6 +1,10 @@
 '''
 Python module for formation reservoir evaluation
-Author: Ibrahim Olawale
+
+Classes
+-------
+
+FormationEvaluation
 '''
 
 import numpy as np
@@ -11,7 +15,8 @@ class FormationEvaluation:
     '''
     Class to evaluate a reservoir based on four main petrophysical parameters.
     Creates an instance of the reservoir to be evaluated
-    args::
+    Arguments
+    --------
         data: dataframe  or csv format of data
         GR: gamma ray column of table
         NPHI: neutron porosity column title
@@ -44,6 +49,13 @@ class FormationEvaluation:
 
         '''
         Method to fill in missing values in the dataset and return dataframe
+
+        Returns
+        -------
+        Dataframe with missing values filled
+
+        Arguments
+        ---------
         use_mean: Specify True or False
                   Use the mean value of a column to fill the column if specified as True
                   Value should be specified if use_mean is set to False
@@ -96,8 +108,13 @@ class FormationEvaluation:
         
         '''
         Method to carry out formation evaluation of a reservoir
-        Returns: Dataframe object with the petrophysical parameters evaluated
-        Args:: baseeline_default: Default cutoff is used to determine shalebaseline for evaluation
+        Returns
+        -------
+        Dataframe object with the petrophysical parameters evaluated
+
+        Arguments
+        ---------
+        baseeine_default: Default cutoff is used to determine shalebaseline for evaluation
                Set to True to use default baseline. If set to False, cutoff value specified during class instation is used
         
         Default baseline is calculated by finding the average of the minimum and maximum shale values
@@ -225,12 +242,19 @@ class FormationEvaluation:
 
         '''
         Method to return a dictionary of paraeters evaluated
-        Returns a dictionary of the parameters values;
+        Returns
+        -------
+        Dictionary of the parameters values;
         Values::
                 Net to Gross ratio
                 Total porosity evaluated
                 Water saturation and
                 Oil saturation
+
+        Arguments
+        -------
+                baseeine_default: Default cutoff is used to determine shalebaseline for evaluation
+               Set to True to use default baseline. If set to False, cutoff value specified during class instation is used
         '''
 
         try:
