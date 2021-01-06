@@ -521,6 +521,9 @@ class PredictLabels():
             train_features = train_features.fillna(-9999, inplace=False)
             test_features = test_features.fillna(-9999, inplace=False)
 
+            train_features = train_features.drop(target, axis=1, inplace=False)
+            test_features = test_features.drop(target, axis=1, inplace=False)
+
         return train_features, test_features, train_target
 
 
@@ -557,6 +560,9 @@ class PredictLabels():
                 n_estimators=100, class_weight='balanced', verbose=2, random_state=20
                                             )
             model1.fit(train_features, train_target)
+
+            if self.plot:
+                self.plot_feat_imp(model1, train_features.columns)
             print('Model training completed...')
         
         elif model == 'XGB':
@@ -571,6 +577,8 @@ class PredictLabels():
 
             model1.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_test, y_test)], verbose=10)
             print('Model training completed...')
+            if self.plot:
+                self.plot_feat_imp(model1, train_features.columns)
 
         return model1, test_features
 
@@ -614,20 +622,22 @@ class PredictLabels():
             # that is if nodel is specified, predictions should be made on the test data
 
             predictions = model.predict(test_df)
-            print(predictions)
+            print('Predictions complete!')
             
         return predictions
 
 
     def plot_feat_imp(self, model, columns):
-
         '''
         Method to plot the feature importance of the model in a bar chart
         according to rank (importance)
 
-        returns: plot of the features importance
+        Returns
+        -------
+        Plot of the features importance
 
-        args::
+        Arguments
+        ---------
             model: trained model object
             columns: features names used for training (dataframe.columns)
         '''
@@ -644,6 +654,7 @@ class PredictLabels():
         ax.set_xticks(x)
         ax.set_xticklabels(columns, rotation='vertical', fontsize=18)
         ax.set_ylabel('Feature Importance Score')
+        ax.set_title('The Model Features Importance')
 
 
     def plot_lithofacies(
