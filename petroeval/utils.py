@@ -82,7 +82,9 @@ def drop_columns(data, *args):
     '''
     function used to drop columns
 
-    returns: dataframe wkth dropped column(s)
+    Returns
+    -------
+    dataframe wkth dropped column(s)
 
     Arguments
     ---------
@@ -116,11 +118,8 @@ def process(df):
     for _ in cols:
 
         df = df.fillna(0)
-        #df[_] = np.where(df[_] == np.inf, 0, df[_])
         df.loc[df[_] == np.inf] = 0
-        #df[_] = np.where(df[_] == np.nan, 0, df[_])
         df.loc[df[_] == np.nan] = 0
-        #df[_] = np.where(df[_] == -np.inf, 0, df[_])
         df.loc[df[_] == -np.inf] = 0
         
     return df
@@ -164,13 +163,13 @@ def label_encode(df, column):
     '''
     Function to label encode a categorical column
 
-    returns: column is dropped and dataframe with the encoded column
+    returns: Dataframe with encoded column is returned while original column is dropped
 
     Arguments
     ---------
 
     df: dataframe
-    column: column in dataframe to check cardinality
+    column: column to be encoded
     '''
             
 
@@ -185,13 +184,13 @@ def one_hot_encode(df, column):
     '''
     Function to one hot encode a categorical column
 
-    returns: column is dropped and dataframe with the encoded column
+    returns: Dataframe with encoded column is returned while original column is dropped
 
     Arguments
     ---------
 
     df: dataframe
-    column: column in dataframe to check cardinality
+    column: column to be encoded
     '''
 
     df = pd.get_dummies(df, prefix=column, columns=[column])

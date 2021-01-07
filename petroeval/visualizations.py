@@ -18,15 +18,17 @@ def log_plot(logs, top, base, GR=True, NPHI=True, RHOB=True, RT=True):
     
     '''
     Plot log signatures of petrophysical parameters.
-    Args::
-            Function accepts a dataframe and a depth argument.
-            Plots the GR, Porosity, Density and Resistivity logs respectively
+    
+    Arguments
+    ----------
+    logs: dataframe/well data, top: where plotting should start from 
+    according to depth or dataframe index
 
-            Pass True for the depth value if dataframe has a depth column, 
-            default is fault (uses index as depth)
-
-            no_plots: No of plots to display depending on petrophysical parameters to be visualized
-                      Default and max value is 4
+    Plots the GR, Porosity, Density and Resistivity logs respectively. 
+    Leave as default if logs should be plotted. Set to False, 
+    if log not present or should not be plotted. Use set_mnemonics from the 
+    preprocessing module to adjust curve titles if it does not tally with the 
+    default arguments
     '''
     
     try:
