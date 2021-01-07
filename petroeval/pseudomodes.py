@@ -19,8 +19,8 @@ DataHandlers()
     defined above
 """
 
-from utils import prepare_datasets, label_encode, sample_evaluation, scale_train_test
-from utils import augment_features, check_cardinality, drop_columns, one_hot_encode
+from .utils import prepare_datasets, label_encode, sample_evaluation, scale_train_test
+from .utils import augment_features, check_cardinality, drop_columns, one_hot_encode
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from plots import four_plots, make_facies_log_plot, compare_plots
 from sklearn.model_selection import KFold, StratifiedKFold

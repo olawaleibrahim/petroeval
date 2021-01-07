@@ -23,7 +23,7 @@ compare_plots(logs, x1, x2, x3, x4, x5, Depth=False)
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
-from utils import process
+from .utils import process
 import numpy as np
 import warnings
 

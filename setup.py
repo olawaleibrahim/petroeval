@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="petroeval", # Replace with your own username
-    version="1.1.7.2",
+    version="1.1.7.5",
     author="Ibrahim Olawale",
     author_email="ibrahim.olawale13@gmail.com",
     long_description=long_description,
