@@ -595,4 +595,113 @@ Example.::
 --------------
 
 plots
------
+=====
+
+Functions
+---------
+
+make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False)
+-----------------------------------------------------------
+Plots well logs against depth and corresponding predicted lithofacies in a labeled color plot.
+
+Arguments
+^^^^^^^^^
+
+**logs**: dataframe with predicted values column as "Facies",  **log1**: str -> well log 1, 
+
+**log5**: str -> well log 2, **depth_col**: depth column, leave as false to use dataframe index
+
+Example.::
+
+    import petroeval as pet
+    pet.plots.make_facies_log_plot(logs=well_data, x1='GR', x2='NPHI', x3='RHOB', 
+                                   x4='CALI', x5='SP', Depth='DEPTH')
+
+compare_plots(logs, x1, x2, x3, x4, x5, Depth=False)
+-----------------------------------------------------------
+Plots well logs against depth and corresponding predicted and actual 
+lithofacies in a labelled color plot for comparism
+
+Arguments
+^^^^^^^^^
+
+**logs**: dataframe of well data with actual lithofacies as "Actual" and predicted 
+lithofacies as "Facies",  **log1**: str -> well log 1, 
+
+**log5**: str -> well log 2, **depth_col**: depth column, leave as false to use dataframe index
+
+Example.::
+
+    import petroeval as pet
+    pet.plots.compare_plots(logs=well_data, x1='GR', x2='NPHI', x3='RHOB', 
+                                   x4='CALI', x5='SP', Depth='DEPTH')
+
+---------------------------------
+
+four_plot(logs, top, base, depth=False)
+---------------------------------------
+
+Function to automatically plot well logs. Makes a plot of four logs(Gamma ray, Porosity, Density and Resistivity)
+
+Arguments
+^^^^^^^^^
+
+**logs**: Dataframe object of well logs, **depth**: Set to false or leave as default to use dataframe index. 
+Set to column title if column depth should be used. Plots the **GR**, **Neutron Porosity**, **Density** and **Resistivity** logs respectively. Leave as default if logs should be plotted.
+Set to False, if log not present or should not be plotted. Use **set_mnemonics** from the *preprocessing* module to adjust 
+curve titles if it does not tally with the default arguments
+
+example.::
+
+    pet.plots.four_plot(logs=well_data, top=0, base=1000, depth='DEPTH_MD')
+
+-------------
+
+four_plots(logs, x1, x2, x3, x4, top, base, depth=False)
+--------------------------------------------------------
+
+Creates a combined plot of four logs(x1, x2, x3, x4)
+
+Arguments
+^^^^^^^^^
+
+**logs**: Dataframe object of well logs, **depth**: Set to false or leave as default to use dataframe index. 
+Set to column title if column depth should be used
+
+Example.::
+
+    pet.plots.four_plots(logs=well_data, x1='GR', x2='SP', 
+                         x3='NPHI', x4='RES', top=0, base=1000, depth=False)
+
+
+------------------
+
+three_plots(logs, x1, x2, x3, top, base, depth=False)
+-----------------------------------------------------
+
+Function to automatically plot three combined well logs. Creates a combined plot of three logs(x1, x2, x3)
+
+Arguments
+^^^^^^^^^
+
+**logs**: Dataframe object of well logs, **depth**: Set to false or leave as default to use dataframe index. 
+Set to column title if column depth should be used
+
+Example.::
+
+    pet.plots.three_plots(logs=well_data, x1='GR', x2='CALI', x3='RHOB',
+                          top=0, base=1000)
+
+--------------------------
+
+two_plots(logs, x1, x2, top, base, depth=False)
+-----------------------------------------------
+
+Function to automatically plot two combined well logs
+
+Arguments
+---------
+
+**logs**: Dataframe object of well logs, **depth**: Set to false or leave as default to use dataframe index, 
+Set to column title if column depth should be used
+

@@ -93,11 +93,18 @@ def four_plot(logs, top, base, depth=False):
 def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
     '''
     Function to automatically plot well logs
-    Returns a plot of three logs(x1, x2, x3)
-    args::
-          logs: Dataframe object of well logs
-          depth: Set to false or leave as default to use dataframe index
-                 Set to column title if column depth should be used
+
+    Returns
+    --------
+    
+    plot of four logs(x1, x2, x3, x4)
+    
+    Arguments
+    ----------
+
+    logs: Dataframe object of well logs
+    depth: Set to false or leave as default to use dataframe index
+           Set to column title if column depth should be used
 
     '''
 
@@ -163,11 +170,18 @@ def four_plots(logs, x1, x2, x3, x4, top, base, depth=False):
 def three_plots(logs, x1, x2, x3, top, base, depth=False):
     '''
     Function to automatically plot well logs
-    Returns a plot of three logs(x1, x2, x3)
-    args::
-          logs: Dataframe object of well logs
-          depth: Set to false or leave as default to use dataframe index
-                 Set to column title if column depth should be used
+    
+    Returns
+    -------
+    
+    plot of three logs(x1, x2, x3)
+    
+    Arguments
+    ---------
+
+    logs: Dataframe object of well logs
+    depth: Set to false or leave as default to use dataframe index
+           Set to column title if column depth should be used
 
     '''
 
@@ -455,7 +469,8 @@ https://github.com/seg/tutorials-2016/blob/master/1610_Facies_classification/
 def make_facies_log_plot(logs, x1, x2, x3, x4, x5, Depth=False):
     '''
     Plots well logs against depth and corresponding predicted lithofacies
-    in a labelled color plot
+    in a labelled color plot. Prediction column shoulod be titled 'Facies' and in integers 
+    for better representation
 
         Arguments
         ---------
