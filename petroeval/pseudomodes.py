@@ -22,7 +22,7 @@ DataHandlers()
 from .utils import prepare_datasets, label_encode, sample_evaluation, scale_train_test
 from .utils import augment_features, check_cardinality, drop_columns, one_hot_encode
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from plots import four_plots, make_facies_log_plot, compare_plots
+from .plots import four_plots, make_facies_log_plot, compare_plots
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
@@ -30,7 +30,6 @@ import sklearn.model_selection as ms
 import matplotlib.pyplot as plt
 import lightgbm as lgb
 import xgboost as xgb
-import preprocessing
 import pandas as pd
 import numpy as np
 import pickle, os

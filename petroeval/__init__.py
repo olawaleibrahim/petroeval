@@ -39,3 +39,4 @@ from petroeval.files_reader import  read_lasio,read_lasios
 from .plots import *
 from .pseudomodes import *
 from .utils import *
+from .preprocessing import *
