@@ -46,5 +46,5 @@ Features include:
     from evaluate_reservoir import FormationEvaluation
     ...
 
-Tutorial link:     
-https://github.com/olawaleibrahim/petroeval/blob/master/petroeval/Tutorial.ipynb
+Tutorial repo link:     
+https://github.com/olawaleibrahim/beta-tests/tree/main/petroeval
