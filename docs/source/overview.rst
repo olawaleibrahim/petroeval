@@ -29,3 +29,9 @@ Example.::
    print(pet)
 
    >>> <petroeval object at 0x7fd171c18450>
+
+-------------
+
+Complete tutorial examples are found in the repo below:
+
+https://github.com/olawaleibrahim/beta-tests/tree/main/petroeval
