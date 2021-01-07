@@ -28,7 +28,7 @@ __all__=[
     ]
 
 from petroeval import visualizations, preprocessing, pseudomodes
-from petroeval import evaluate_reservoir, plots
+from petroeval import evaluate_reservoir, plots, utils
 from .evaluate_reservoir import FormationEvaluation
 from .pseudomodes import PredictLabels, PredictLitho, DataHandlers
 from .visualizations import log_plot

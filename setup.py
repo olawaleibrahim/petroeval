@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="petroeval", # Replace with your own username
-    version="1.1.4",
+    version="1.1.7.2",
     author="Ibrahim Olawale",
     author_email="ibrahim.olawale13@gmail.com",
     long_description=long_description,
@@ -17,6 +17,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
-    install_requires=['matplotlib', 'pandas', 'numpy', 'lasio']
+    include_package_data=True,
+    python_requires='>=3.8',
+    install_requires=[
+        'matplotlib', 'pandas', 'numpy', 'lasio==0.28',
+        'xgboost', 'lightgbm']
 )
