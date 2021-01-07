@@ -22,3 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 If you have questions, contact email address: ibrahim.olawale13@gmail.com
+
+Copyright 2020 Olawale Ibrahim
+
+As per contest rules: The well log labels used for making the pretrained models are licensed CC-BY-4.0. 
+The well log data used for training the pretrained model in this this package is licensed as Norwegian License for Open Government Data (NLOD) 2.0. 
+Any publication involving the well log data must cite “Lithofacies data was provided by the FORCE Machine 
+Learning competition with well logs and seismic 2020”. For citation please use: Bormann P., Aursand P., 
+Dilib F., Dischington P., Manral S. 2020. 2020 FORCE Machine Learning Contest.
