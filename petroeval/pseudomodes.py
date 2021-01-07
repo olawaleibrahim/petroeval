@@ -328,7 +328,8 @@ class PredictLabels():
     def __init__(self, df, depth_col=None, plot=True):
 
         '''
-        args::
+        Arguments
+        ----------
             df: dataframe for predicting lithofacies
             depth_col: specify column name if prediction should be based on that depth,
                         leave as default (None), if dataframe index should be used or

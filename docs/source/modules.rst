@@ -23,26 +23,21 @@ Cconverting las file to dataframe.::
     df = las.df()
 
 evaluate_reservoir
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+
 This module is used for evaluating and estimating reservoir properties.
 
-Reservoir Classes
-------------------
-
 FormationEvaluation(data, GR, NPHI, RHOB, RT, top, base, cutoff)
+*****************************************************************
 
 Class to evaluate a reservoir based on four main petrophysical parameters.
 Creates an instance of the reservoir to be evaluated
 
 Arguments
 ---------
-data: dataframe  or csv format of data, GR: gamma ray column of table
+**data**: dataframe  or csv format of data, **GR**: gamma ray column of table, **NPHI**: neutron porosity column title, **RHOB**: density column title
 
-NPHI: neutron porosity column title, RHOB: density column title
-
-RT: resistivity column title, top: top of reservoir (in, metres, feets)
-
-base: base of reservoir (in, metres, feets), cutoff: Shale baseline value in API
+**RT**: resistivity column title, **top**: top of reservoir (in, metres, feets), **base**: base of reservoir (in, metres, feets), cutoff: Shale baseline value in API
 
 Example.::
 
@@ -51,11 +46,14 @@ Example.::
 
     >>> <petroeval.evaluate_reservoir.FormationEvaluation object at 0x7fd171c18450>
     
-show_table method.::
+show_table method
+********************
+
+Example.::
 
     table = reservoir1.show_table(baseline_default=False)
 
-    >>> 62 will be used for evaluation
+    >>> 75 will be used for evaluation
     ESTIMATED PETROPHYSICAL PARAMETERS
 
 Fill missing values using mean values of the columns, specify value if mean shouldn't be applied.::
@@ -89,9 +87,6 @@ Quick Start.::
 
     import petroeval.pseudomodes as pds
 
-Pseudomodes Classes
---------------------
-
 PredictLitho()
 --------------
 Class used for predicting lithology values from well logs. Well log data is provided
@@ -99,7 +94,7 @@ and missing section range to be predicted is passed. Takes in two arguments; the
 and the depth column. Specify False if dataframe index should be used/if depth column 
 is not available.
 
-Sample Tutorial.::
+Example.::
 
     litho = pds.PredictLitho(df=df)
 
@@ -123,10 +118,9 @@ Train features, train target, test features
 Arguments
 **********
 
-df: dataframe to be preprocessed
-target: column to be predicted
-start: where prediction should start from
-end: where prediction should stop.::
+**df**: dataframe to be preprocessed, **target**: column to be predicted
+
+**start**: where prediction should start from, **end**: where prediction should stop.::
 
     train_features, test_features, train_target = litho._preprocess(df=df, target='target_column', start=0, end=1000)
 
@@ -143,12 +137,11 @@ Trained model, test features needed for predictions
 
 Arguments
 *********
-target: Column to be predicted
-start: where prediction should start from
-end: where prediction should stop
-model: model to be used; default value is 'RF' for random forest
+**target**: Column to be predicted, **start**: where prediction should start from
+**end**: where prediction should stop, **model**: model to be used; default value is 'RF' for random forest
 other options are 'XG' for XGBoost,'LGB' for LightGBM
-CV: number of cross validation folds to run (currently not implemented).::
+
+**CV**: number of cross validation folds to run (currently not implemented).::
     
     trained_model = litho.train(target='target_column', start=0, end=1000, plot=True)
 
@@ -166,14 +159,131 @@ Prediction values
 Arguments
 **********
 
-target: Column to be predicted
-start: where prediction should start from
-end: where prediction should stop
-model: model to be used; default value is 'RF' for random forest, 
-other options are 'XG' for XGBoost, 'CAT' for CatBoost, 
-CV: number of cross validation folds to run (currently not implemented).::
+**target**: Column to be predicted, **start**: where prediction should start from
+
+**end**: where prediction should stop, **model**: model to be used; default value is 'RF' for random forest, 
+other options are 'XG' for XGBoost, 'CAT' for CatBoost,
+
+**CV**: number of cross validation folds to run (currently not implemented).::
 
     predictions = lithos.predict('GR', 0, 500, model='LGB')
+
+PredictLabels()
+---------------
+
+Class for predicting lithofacies from well logs.
+
+Arguments
+*********
+
+**df**: dataframe for predicting lithofacies, **depth_col**: specify column name if prediction should be based on that depth,
+leave as default (None), if dataframe index should be used or if depth column is not available
+**plot**: to return the feature importance plot after model training
+
+Example.::
+
+    facies = pds.PredictLabels(df=df, depth_col='DEPTH_MD', plot=True)
+
+PredictLitho Methods
+--------------------
+
+_preprocess(df)
+***************
+
+Preprocessing method: Takes care of missing values, encoding categorical features
+augmenting features
+
+Returns
+*******
+
+Preprocessed dataframe
+
+Arguments
+*********
+
+df: dataframe to be preprocessed
+
+Example.::
+
+    processed_data = facies._preprocess(df)
+
+pretrain()
+**********
+
+Training method
+        
+Returns
+*******
+
+A list of the pretrained models, test features needed for prediction
+
+Example.::
+
+    pretrained_models = facies.pretrain()
+
+prepare(train, target, test=None, start=None, end=None)
+*******************************************************
+
+Method to prepare dataset(s) for training
+
+Returns
+********
+
+Train data features, test data features, train target
+
+Arguments
+*********
+
+**train**: train data, **target**: target column string name
+**test**: test dataframe if test features is in a different dataframe, default is none (if test is part of train dataset). start and end should be specified.
+
+**start**: specify start point for test features from train data if test features, dataframe does not exist i.e if desired prediction section is a missing section from the supplied train data, **end**: where test features should stop from train data provided
+
+Sample.::
+
+    train_features, test_features, train_target = facies.prepare(train=traindata, 
+                                                                 target='target_column', 
+                                                                 test=None, start=None, end=None)
+
+_train(train_df, target, start=None, end=None, test_df=None, model='RF')
+*************************************************************************
+
+Returns
+*******
+
+Trained model, test features needed for prediction
+
+Arguments
+**********
+
+**train_df**: train dataframe, start: where prediction should start from, **end**: where prediction should stop, target: target column to be used for training (string/column name)
+
+**model**: model to be used; default value is 'RF' for random forest, other options are 'XG' for XGBoost
+
+Example.::
+
+    trained_model, test_features = facies._train(train_df=traindata, target='target_column', 
+                                                 start=None, end=None, test_df=None, model='RF')
+
+predict(test_df=None, target=None, model=False)
+***********************************************
+
+Returns
+*******
+
+Prediction values
+
+Arguments
+*********
+
+**test_df**: test dataframe if test features is in a different dataframe, **model**: default value is false (pretraioned model is used for prediction), 
+
+Trained model object should be specified if available, if not, the model is trained based on other arguments passed
+
+Example.::
+
+    predictions = facies.predict(model=model, test_df=test_features, 
+                                 start=0, end=1000)
 
 visualizations
 ^^^^^^^^^^^^^^
