@@ -24,7 +24,7 @@ utils.py
 
 __all__=[
     'read_lasio','read_lasios','plots','visualizations',
-    'evaluate_reservoir', 'preprocessing', 'pseudomodes'
+    'evaluate_reservoir', 'preprocessing', 'pseudomodes','utils'
     ]
 
 from petroeval import visualizations, preprocessing, pseudomodes

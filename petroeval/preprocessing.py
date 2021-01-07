@@ -31,29 +31,24 @@ def set_mnemonics(data, GR, NPHI, RHOB, RT):
 
     return data
     
-def truncation(data, GR, truncate=True):
+def truncation(data, column, upper_limit, lower_limit):
     
     '''
     Function to preprocess data ranges;
     truncates outrageous outliers of reservoir properties
 
-    args::
+    Arguments
+    ---------
             data: dataframe object of well log
-            gr: if set to True; Gamma Ray values will be set to the standard 0-150 API range
-                if set to False; no truncation will be done
+            column: column to be truncated
 
     returns: dataframe object with preprocessed properties
     '''
 
     assert isinstance(data, pd.DataFrame), 'Data should be a DataFrame object'
-    assert isinstance(GR, str), f'{GR} is of type {type(GR)}. GR value should be set a string.'
-    assert isinstance(truncate, bool), f'truncate value should be a boolean value'
+    assert isinstance(column, str), f'{column} is of type {type(column)}. GR value should be set a string.'
 
-    if truncate==False:
-        pass
-
-    else:
-        data[GR] = np.where(data[GR] < 0, 0, data[GR])
-        data[GR] = np.where(data[GR] > 150, 150, data[GR])
+    data[column] = np.where(data[column] < lower_limit, lower_limit, data[column])
+    data[column] = np.where(data[column] > upper_limit, upper_limit, data[column])
 
     return data
