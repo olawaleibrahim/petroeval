@@ -12,17 +12,17 @@ Features include:
     - Net to Gross Volume
     - Net Pay of Reservoir section
 
--   Visualizing well logs for correlation
+-   Predicting well lithofacies and lithology values using machine learning
+
+-   Data preparation and preprocessing for machine learning us use
+
+-   Visualizing well logs
+
+-   Reading las files
 
 -   Resolving missing values in well logs
 
 -   Automatic correction of estimated properties
-
-Subsequent release features:
-
--   Total oil or gas in place
--   Permeability of reservoir section
--   Official documentations to follow
 
 ### QUICK TUTORIAL
 
