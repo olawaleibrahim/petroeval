@@ -377,8 +377,13 @@ class PredictLabels():
         # augmentation procedure terminated to resume below (reasons)
         df = df.drop('WELL', axis=1, inplace=False)
 
-        group_encoded = pickle.load(open('model/group_encoded', 'rb'))
-        formation_encoded = pickle.load(open('model/formation_encoded', 'rb'))
+        file_dir = os.path.dirname(__file__)
+        
+        group_encoded = pickle.load(open(os.path.join(file_dir + '\model\group_encoded'), 'rb'))
+        formation_encoded = pickle.load(open(os.path.join(file_dir + "\model\eormation_encoded"), 'rb'))
+
+        #group_encoded = pickle.load(open('model/group_encoded', 'rb'))
+        #formation_encoded = pickle.load(open('model/formation_encoded', 'rb'))
 
         df['GROUP_enc'] = (df.GROUP).map(group_encoded)
         df['FORMATION_enc'] = (df.FORMATION).map(formation_encoded)
@@ -411,9 +416,13 @@ class PredictLabels():
             
         models = []
         i = 0
-        for i in range(1, (len(os.listdir('./model')) - 1)):
+
+        file_dir = os.path.dirname(__file__)
+
+        for i in range(1, (len(os.listdir(os.path.join(file_dir + '\model'))) - 1)):
             model = xgb.Booster()
-            model.load_model(f'./model/lithofacies_model{i}.model')
+            model.load_model(os.path.join(file_dir + '\model\lithofacies_model' + str(i) + '.model'))
+            #model.load_model(f'./model/lithofacies_model{i}.model')
             models.append(model)
 
         test_features = self._preprocess(self.df)
@@ -461,8 +470,9 @@ class PredictLabels():
             except TypeError as err:
                 raise err
 
-            if type(self.depth_col) == type(None):
+            if type(self.depth_col) == type(None) or self.depth_col == False:
                 train['depth'] = range(0, train.shape[0])
+            
             else:
                 # converting the depths to integers, for easier slicing operation when preparing data
                 depths = list(train[self.depth_col])
@@ -559,6 +569,7 @@ class PredictLabels():
             model1 = RandomForestClassifier(
                 n_estimators=100, class_weight='balanced', verbose=2, random_state=20
                                             )
+
             model1.fit(train_features, train_target)
 
             if self.plot:
@@ -566,6 +577,7 @@ class PredictLabels():
             print('Model training completed...')
         
         elif model == 'XGB':
+
             X_train, X_test, y_train, y_test = ms.train_test_split(
                 train_features, train_target, test_size=0.2, stratify=train_target
             )
@@ -613,7 +625,9 @@ class PredictLabels():
                 print(f'Model {i}, predicting...')
                 i += 1
 
-            predictions = predictions/(len(os.listdir('model')) - 2)
+            file_dir = os.path.dirname(__file__)
+            
+            predictions = predictions/(len(os.listdir(os.path.join(file_dir + '\model'))) - 2)
             predictions = pd.DataFrame(predictions).idxmax(axis=1)
             print('Predictions complete!')
 
@@ -822,6 +836,9 @@ class DataHandlers():
 
             elif check_cardinality(cat_df, column) == 'Low':
                 cat_df = one_hot_encode(cat_df, column)
+
+            else:
+                cat_df = label_encode(cat_df, column)
 
         df = df.drop(previous_cat_columns, axis=1, inplace=False)
         df = pd.concat((df, cat_df), axis=1)
