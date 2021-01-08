@@ -379,8 +379,8 @@ class PredictLabels():
 
         file_dir = os.path.dirname(__file__)
         
-        group_encoded = pickle.load(open(os.path.join(file_dir + '\model\group_encoded'), 'rb'))
-        formation_encoded = pickle.load(open(os.path.join(file_dir + "\model\eormation_encoded"), 'rb'))
+        group_encoded = pickle.load(open(os.path.join(file_dir + '/model/group_encoded'), 'rb'))
+        formation_encoded = pickle.load(open(os.path.join(file_dir + "/model/eormation_encoded"), 'rb'))
 
         #group_encoded = pickle.load(open('model/group_encoded', 'rb'))
         #formation_encoded = pickle.load(open('model/formation_encoded', 'rb'))
@@ -419,9 +419,10 @@ class PredictLabels():
 
         file_dir = os.path.dirname(__file__)
 
-        for i in range(1, (len(os.listdir(os.path.join(file_dir + '\model'))) - 1)):
+        #for i in range(1, (len(os.listdir(os.path.join(file_dir + '\model'))) - 1)):
+        for i in range(1, 3):
             model = xgb.Booster()
-            model.load_model(os.path.join(file_dir + '\model\lithofacies_model' + str(i) + '.model'))
+            model.load_model(os.path.join(file_dir + '/model/lithofacies_model' + str(i) + '.model'))
             #model.load_model(f'./model/lithofacies_model{i}.model')
             models.append(model)
 
