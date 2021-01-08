@@ -628,7 +628,7 @@ class PredictLabels():
 
             file_dir = os.path.dirname(__file__)
             
-            predictions = predictions/(len(os.listdir(os.path.join(file_dir + '\model'))) - 2)
+            predictions = predictions/2
             predictions = pd.DataFrame(predictions).idxmax(axis=1)
             print('Predictions complete!')
 
