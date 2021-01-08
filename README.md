@@ -14,7 +14,7 @@ Features include:
 
 -   Predicting well lithofacies and lithology values using machine learning
 
--   Data preparation and preprocessing for machine learning us use
+-   Data preparation and preprocessing for machine learning use
 
 -   Visualizing well logs
 
@@ -45,6 +45,10 @@ Features include:
     # Create an instance of the reservoir section passing in required arguments
     from evaluate_reservoir import FormationEvaluation
     ...
+
+Official Documentations: https://petroeval.readthedocs.io/
+
+Google Drive link for notebooks and data sets: https://drive.google.com/drive/folders/18A2M3o7XU2xz-gR3SAJxOFDpDHxf3OLl?usp=sharing
 
 Tutorial repo link:     
 https://github.com/olawaleibrahim/beta-tests/tree/main/petroeval
