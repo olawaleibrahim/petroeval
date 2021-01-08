@@ -23,8 +23,8 @@ utils.py
 '''
 
 __all__=[
-    'read_lasio','read_lasios','plots','visualizations', 'files_reader',
-    'evaluate_reservoir', 'preprocessing', 'pseudomodes','utils'
+    'read_lasio', 'read_lasios','plots','visualizations', 'files_reader',
+    'evaluate_reservoir', 'preprocessing', 'pseudomodes', 'utils', 'models'
     ]
 
 

@@ -411,9 +411,9 @@ class PredictLabels():
             
         models = []
         i = 0
-        for i in range(1, (len(os.listdir('model')) - 1)):
+        for i in range(1, (len(os.listdir('./model')) - 1)):
             model = xgb.Booster()
-            model.load_model(f'model/lithofacies_model{i}.model')
+            model.load_model(f'./model/lithofacies_model{i}.model')
             models.append(model)
 
         test_features = self._preprocess(self.df)

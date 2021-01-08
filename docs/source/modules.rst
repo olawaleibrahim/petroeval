@@ -243,7 +243,8 @@ Training method
 Returns
 ^^^^^^^
 
-A list of the pretrained models, test features needed for prediction
+A list of the pretrained models, test features needed for prediction. The pretrained models 
+were pretrained with GPU support, so GPU is required to make predictions with the models.
 
 Example.::
 
@@ -302,10 +303,13 @@ Example.::
 predict(test_df=None, target=None, model=False)
 -----------------------------------------------
 
+The pretrained models 
+were pretrained with GPU support, so GPU is required to make predictions with the models.
+
 Returns
 ^^^^^^^
 
-Prediction values
+Prediction values. 
 
 Arguments
 ^^^^^^^^^
