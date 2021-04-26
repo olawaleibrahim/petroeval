@@ -48,7 +48,5 @@ Features include:
 
 Official Documentations: https://petroeval.readthedocs.io/
 
-Google Drive link for notebooks and data sets: https://drive.google.com/drive/folders/18A2M3o7XU2xz-gR3SAJxOFDpDHxf3OLl?usp=sharing
-
 Tutorial repo link:     
 https://github.com/olawaleibrahim/beta-tests/tree/main/petroeval
