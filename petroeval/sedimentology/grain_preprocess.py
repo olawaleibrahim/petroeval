@@ -42,7 +42,7 @@ class GrainPreprocess:
         ]
         return stack_of_sieves_in_phi_scale
 
-    def bed_thickness_in_percentage(self, measured_bed_thickness: List[float]):
+    def bed_sieve_reminant_in_percentage(self, measured_seive_reminant: List[float]):
         """Bed_Thickness_In_Percentage
 
         This method converts the measured bed thickess of the field to a scale with 0-100
@@ -50,50 +50,48 @@ class GrainPreprocess:
             list[float]: Array of Bed_thickness between 0 and 100
         """
 
-        bounded_bed_thickness: List[float] = [
-            (round(bed / (sum(measured_bed_thickness)) * 100), 2)
-            for bed in measured_bed_thickness
+        bounded_bed_sieve_remenant: List[float] = [
+            (round(seive_reminant / (sum(measured_seive_reminant)) * 100), 2)
+            for seive_reminant in measured_seive_reminant
         ]
 
-        return bounded_bed_thickness
+        return bounded_bed_sieve_remenant
 
-    def bed_thickness_accumlation(self, bounded_bed_thickness: list[float]):
-        """Bed Thickness Acumulation
+    def bed_reminant_accumlation(self, bounded_bed_sieve_reminant: list[float]):
+        """Bed Reminant Acumulation
 
-            This method calculates the cumulative sum of the thickness within the bed.
+            This method calculates the cumulative sum of the reminant within the bed.
         Args:
-            bounded_bed_thickness (list[float]): There is a constraint that prevents the sum of the bounded_bed_thickness to be greater 100
+            bounded_bed_sieve_reminant (list[float]): There is a constraint that prevents the sum of the bounded_bed_reminant to be greater 100
 
         Raises:
-            ValueError: Raise this error when the sum of the bounded_bed_thickness is greater than 100
+            ValueError: Raise this error when the sum of the bounded_bed_sieve_reminant is greater than 100
 
         Returns:
             List[float]: An array of the cumulative sum of the thickness of a bed
         """
 
-        sum_validation = sum(bounded_bed_thickness)
+        sum_validation = sum(bounded_bed_sieve_reminant)
 
         if sum_validation > 100:
             raise ValueError(
                 f"The total thickness of the evaluated bed in greater than 100: it is {sum_validation}"
             )
 
-        accumulated_bed_thickness: List[float] = []
+        accumulated_bed_reminant: List[float] = []
         increment_by = 0
-        for bed_thickness in bounded_bed_thickness:
-            increment_by += bed_thickness
-            accumulated_bed_thickness.append(round(increment_by, 2))
+        for bed_sieve_reminant in bounded_bed_sieve_reminant:
+            increment_by += bed_sieve_reminant
+            accumulated_bed_reminant.append(round(increment_by, 2))
 
-        return accumulated_bed_thickness
+        return accumulated_bed_reminant
 
-    def bed_percentiles(
-        self, accumlated_bed_thickness: List[float]
-    ) -> Dict[str, float]:
+    def bed_percentiles(self, accumlated_bed_reminant: List[float]) -> Dict[str, float]:
         """Bed Percentiles
         This method returns a dictionary of the standard sedimentological passings and the accumulated_sum of bed_thickness.
         The Sedimentology Passing 5%,25%, 16%, 50%, 75%, 84%, 95%, 100%
         Args:
-            accumlated_bed_thickness (List[float]): This are the accumlated sum of the bed thickness.
+            accumlated_bed_reminant (List[float]): This are the accumlated sum of the bed thickness.
 
         Returns:
             Dict[str, float]: This is the passing with the coresponding thickness
@@ -109,4 +107,4 @@ class GrainPreprocess:
             "95%",
             "100%",
         ]
-        return dict(zip(SED_PASSING, accumlated_bed_thickness))
+        return dict(zip(SED_PASSING, accumlated_bed_reminant))
