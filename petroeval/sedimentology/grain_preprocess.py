@@ -3,6 +3,7 @@ from typing import Dict, List
 
 
 class GrainPreprocess:
+    """Grain Process class"""
 
     def __init__(
         self,

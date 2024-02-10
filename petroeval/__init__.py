@@ -1,5 +1,5 @@
 """
-This package helps to aid the formation evaluation and interpretation 
+This package helps to aid the formation evaluation and interpretation
 process of a reservoir by estimating reservoir properties
 
 Modules
