@@ -2,7 +2,7 @@ from typing import List
 from pandas import DataFrame
 
 
-class grain_statistics:
+class GrainStatistics:
 
     def __init__(self, grain_sizes_in_phi: List[float]) -> None:
 

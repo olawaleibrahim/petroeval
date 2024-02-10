@@ -1,80 +1,36 @@
 from unittest import TestCase, main
-from petroeval.sedimentology.grain_preprocess import GrainPreprocess
+from petroeval.sedimentology.grain_statistics import GrainStatistics
 
 
-class TestGrainPreprocess(TestCase):
+class TestGrainStatistics(TestCase):
 
-    def _grain_preprocess(self):
-        return GrainPreprocess()
+    def _grain_stats(self):
+        return GrainStatistics(
+            grain_sizes_in_phi=[-0.65, 0.15, 0.65, 1.75, 2.45, 2.65, 3.45]
+        )
 
-    def test_stack_to_phi_scale(self):
+    def test_graphic_mean(self):
 
-        grain_size_in_phi_scale = self._grain_preprocess().stack_to_phi_scale()
+        graphic_mean = self._grain_stats().graphic_mean()
+        self.assertEquals(first=graphic_mean, second=1.52)
 
+    def test_graphic_standard_deviation(self):
+        graphic_standard_dev = self._grain_stats().graphic_standard_deviation()
         self.assertEquals(
-            first=grain_size_in_phi_scale,
-            second=[-1.0, -0.24, 0.23, 1.23, 1.74, 2.74, 3.74, 3.99],
+            first=graphic_standard_dev,
+            second=1.25,
         )
 
-    def test_bed_sieve_reminant_in_percentage(self):
-        bed_A = [2.6, 12.4, 17.4, 41.1, 9.9, 10, 4.2, 1]
-        bed_sieve_reminant_in_percentage = (
-            self._grain_preprocess().bed_sieve_reminant_in_percentage(
-                measured_seive_reminant=bed_A
-            )
-        )
-        self.assertEquals(
-            first=bed_sieve_reminant_in_percentage,
-            second=[2.64, 12.58, 17.65, 41.68, 10.04, 10.14, 4.26, 1.01],
-        )
+    def test_graphic_standard_kurtosis(self):
 
-    def test_bed_reminant_accumlation(self):
+        graphic_standard_kurtosis = self._grain_stats().graphic_standard_kurtosis()
 
-        bounded_bed_sieve_reminant = [
-            2.64,
-            12.58,
-            17.65,
-            41.68,
-            10.04,
-            10.14,
-            4.26,
-            1.01,
-        ]
-        accumulated_bed_reminant = self._grain_preprocess().bed_reminant_accumlation(
-            bounded_bed_sieve_reminant=bounded_bed_sieve_reminant
-        )
-        self.assertEquals(
-            first=accumulated_bed_reminant,
-            second=[2.64, 15.22, 32.87, 74.55, 84.59, 94.73, 98.99, 100.0],
-        )
+        self.assertEquals(first=graphic_standard_kurtosis, second=3.02)
 
-    def test_bed_percentiles(self):
-        accumulated_bed_sieve_reminant = [
-            2.64,
-            15.22,
-            32.87,
-            74.55,
-            84.59,
-            94.73,
-            98.99,
-            100.0,
-        ]
-        bed_percentiles = self._grain_preprocess().bed_percentiles(
-            accumlated_bed_reminant=accumulated_bed_sieve_reminant
-        )
-        self.assertEquals(
-            first=bed_percentiles,
-            second={
-                "5%": 1.62,
-                "16%": 8.01,
-                "25%": 19.67,
-                "50%": 59.63,
-                "75%": 81.23,
-                "84%": 95.94,
-                "95%": 99.39,
-                "100%": 100.0,
-            },
-        )
+    def test_graphic_skewness(self):
+        graphic_skewness = self._grain_stats().graphic_skewness()
+
+        self.assertEquals(first=graphic_skewness, second=-2.31)
 
 
 if __name__ == "__main__":
