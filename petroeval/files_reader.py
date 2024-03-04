@@ -4,10 +4,13 @@ def read_lasio(path:'str')->'object':
 
     """
     This function reads well logs in las files
-    args:
+    Arguments
+    ----------
     	  path(str) :paths to lasio file
 
-    returns: las object
+    Returns
+    --------
+    las object
 
     """
     assert isinstance(path, str), 'File must be in a string'

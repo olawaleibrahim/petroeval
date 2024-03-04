@@ -12,17 +12,17 @@ Features include:
     - Net to Gross Volume
     - Net Pay of Reservoir section
 
--   Visualizing well logs for correlation
+-   Predicting well lithofacies and lithology values using machine learning
+
+-   Data preparation and preprocessing for machine learning use
+
+-   Visualizing well logs
+
+-   Reading las files
 
 -   Resolving missing values in well logs
 
 -   Automatic correction of estimated properties
-
-Subsequent release features:
-
--   Total oil or gas in place
--   Permeability of reservoir section
--   Official documentations to follow
 
 ### QUICK TUTORIAL
 
@@ -46,5 +46,7 @@ Subsequent release features:
     from evaluate_reservoir import FormationEvaluation
     ...
 
-Tutorial link:     
-https://github.com/olawaleibrahim/petroeval/blob/master/petroeval/Tutorial.ipynb
+Official Documentations: https://petroeval.readthedocs.io/
+
+Tutorial repo link:     
+https://github.com/olawaleibrahim/beta-tests/tree/main/petroeval

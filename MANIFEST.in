@@ -1,0 +1,5 @@
+include petroeval/data
+include petroeval/model/eormation_encoded
+include petroeval/model/group_encoded
+include petroeval/model/lithofacies_model1.model
+include petroeval/model/lithofacies_model2.model
